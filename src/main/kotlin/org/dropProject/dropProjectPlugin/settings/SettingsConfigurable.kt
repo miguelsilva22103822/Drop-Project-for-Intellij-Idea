@@ -26,7 +26,10 @@ class SettingsConfigurable : Configurable {
         return (!mySettingsComponent?.getServerURL().equals(settings.serverURL)) or
                 (!mySettingsComponent?.getNameField().equals(settings.username)) or
                 (!mySettingsComponent?.getNumberField().equals(settings.usernumber)) or
-                (!mySettingsComponent?.getTokenField().contentEquals(settings.token))
+                (!mySettingsComponent?.getTokenField().contentEquals(settings.token)) or
+                (!mySettingsComponent?.getOpenAiTokenField().contentEquals(settings.openAiToken)) or
+                (mySettingsComponent?.isAutoSendPromptSelected() != settings.autoSendPrompt) or
+                (mySettingsComponent?.getSentenceList() != settings.sentenceList)
     }
 
     override fun apply() {
@@ -35,6 +38,9 @@ class SettingsConfigurable : Configurable {
         settings.username = mySettingsComponent?.getNameField()!!
         settings.usernumber = mySettingsComponent?.getNumberField()!!
         settings.token = mySettingsComponent?.getTokenField()!!
+        settings.openAiToken = mySettingsComponent?.getOpenAiTokenField()!!
+        settings.autoSendPrompt = mySettingsComponent?.isAutoSendPromptSelected() ?: false
+        settings.sentenceList = (mySettingsComponent?.getSentenceList() as MutableList<String>?)!!
     }
 
     override fun reset() {
@@ -43,7 +49,9 @@ class SettingsConfigurable : Configurable {
         settings.username.let { mySettingsComponent?.setNameField(it) }
         settings.usernumber.let { mySettingsComponent?.setNumberField(it) }
         settings.token.let { mySettingsComponent?.setTokenField(it) }
-
+        settings.openAiToken.let { mySettingsComponent?.setOpenAiTokenField(it) }
+        settings.autoSendPrompt.let { mySettingsComponent?.setAutoSendPrompt(it) }
+        settings.sentenceList.let { mySettingsComponent?.setSentenceList(it) }
     }
 
     override fun disposeUIResources() {

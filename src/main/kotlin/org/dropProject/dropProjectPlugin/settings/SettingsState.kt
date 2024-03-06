@@ -17,7 +17,10 @@ class SettingsState : PersistentStateComponent<SettingsState> {
     var username: String = ""
     var usernumber: String = ""
     var token: String = ""
+    var openAiToken: String = ""
+    var autoSendPrompt: Boolean = false // New property
     var publicAssignments: MutableList<String> = mutableListOf()
+    var sentenceList: MutableList<String> = mutableListOf()
 
     companion object {
         fun getInstance(): SettingsState {

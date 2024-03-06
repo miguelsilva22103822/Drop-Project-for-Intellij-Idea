@@ -23,7 +23,9 @@ import org.dropProject.dropProjectPlugin.actions.SearchAssignment
 import org.dropProject.dropProjectPlugin.assignmentComponents.ListTable
 import org.dropProject.dropProjectPlugin.loginComponents.Authentication
 import org.dropProject.dropProjectPlugin.settings.SettingsState
+import org.dropProject.dropProjectPlugin.submissionComponents.UIGpt
 import org.dropProject.dropProjectPlugin.toolWindow.panel.AssignmentTablePanel
+import org.dropProject.dropProjectPlugin.toolWindow.panel.ChatGptPanel
 import org.dropProject.dropProjectPlugin.toolWindow.panel.ToolbarPanel
 import org.dropProject.dropProjectPlugin.toolWindow.panel.ToolbarSearchPanel
 import javax.swing.BorderFactory
@@ -68,12 +70,20 @@ class DropProjectToolWindow(var project: Project) {
         val assignmentTablePanel = AssignmentTablePanel(resultsTable!!)
         assignmentTablePanel.border = IdeBorderFactory.createBorder(SideBorder.TOP or SideBorder.RIGHT)
 
+        val chatGptPanel = ChatGptPanel()
 
         tabbedPane.tabComponentInsets = JBInsets(0, 0, 0, 0)
         tabbedPane.setTabComponentAt(
             0,
             createTabComponent(tabbedPane, "Assignment List", AllIcons.Actions.ListFiles, assignmentTablePanel, false)
         )
+
+        val gui : UIGpt = UIGpt.getInstance()
+
+        tabbedPane.setTabComponentAt(
+            1,
+            createTabComponent(tabbedPane, "ChatGPT", AllIcons.Ide.Like, gui.buildComponents(), false))
+
 
         horizontalSplitter = OnePixelSplitter(true, 0.04f)
         horizontalSplitter!!.border = BorderFactory.createEmptyBorder()

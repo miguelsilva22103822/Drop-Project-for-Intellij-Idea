@@ -17,6 +17,8 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.5.2")
     implementation("com.squareup.moshi:moshi:1.14.0")
     ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.0")
     implementation(group = "net.lingala.zip4j", name = "zip4j", version = "2.10.0")
@@ -24,6 +26,9 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.15.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.1")
     implementation("io.github.resilience4j:resilience4j-ratelimiter:2.1.0")
+    implementation("com.github.rjeschke:txtmark:0.13")
+    implementation("com.atlassian.commonmark:commonmark:0.2.0")
+    implementation("me.friwi:jcefmaven:116.0.19.1")
 
 }
 kotlin {

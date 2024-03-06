@@ -23,6 +23,15 @@ class DropProjectToolWindowFactory : ToolWindowFactory {
 
     }
 
+    fun update(@NotNull project: Project, @NotNull toolWindow: ToolWindow) {
+        ApplicationManager.getApplication().invokeLater {
+            val mainTabContent = DropProjectToolWindow(project)
+            val contentFactory = ContentFactory.getInstance()
+            val content = contentFactory.createContent(mainTabContent.getContent(), "", false)
+            toolWindow.contentManager.addContent(content)
+            toolWindow.setTitleActions(listOf(OpenSettings(project)))
+        }
+    }
 
 }
 

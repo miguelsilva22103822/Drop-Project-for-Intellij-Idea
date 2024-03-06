@@ -25,6 +25,8 @@ class RefreshList(private var toolWindow: DropProjectToolWindow) :
     }
 
     override fun actionPerformed(e: AnActionEvent) {
+        //getChatGptResponse("Hello, give a random kotlin function with 5 lines of code")
+
         try {
             if (coolOffTimer == null) {
                 rateLimiter.executeCallable {

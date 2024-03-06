@@ -1,5 +1,6 @@
 package org.dropProject.dropProjectPlugin.submissionComponents
 
+import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.panel
@@ -145,6 +146,4 @@ internal class UIBuildReport {
 
         return scrollPane
     }
-
-
 }

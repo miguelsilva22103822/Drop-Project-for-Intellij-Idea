@@ -304,8 +304,6 @@ class UIGpt {
 
         phrases.add("") //Option that doesn't add anything to the prompt
 
-        println("fuck this shit if this doesnt work i swear i will break my fucking computer")
-        println(phrases)
 
         phraseComboBox.removeAll()
     }

@@ -27,7 +27,8 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.1")
     implementation("io.github.resilience4j:resilience4j-ratelimiter:2.1.0")
     implementation("com.github.rjeschke:txtmark:0.13")
-    implementation("com.atlassian.commonmark:commonmark:0.2.0")
+    implementation("com.atlassian.commonmark:commonmark:0.17.0")
+    //implementation("org.commonmark:0.21.0")
     implementation("me.friwi:jcefmaven:116.0.19.1")
 
 }

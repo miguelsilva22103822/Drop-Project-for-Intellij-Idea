@@ -102,8 +102,10 @@ class GptInteraction {
         try {
             val response = client.newCall(request).execute()
 
+            println("response: $response")
+
             if (!response.isSuccessful) {
-                return ""
+                return "Ocorreu um erro"
             }
 
             val json = response.body?.string()

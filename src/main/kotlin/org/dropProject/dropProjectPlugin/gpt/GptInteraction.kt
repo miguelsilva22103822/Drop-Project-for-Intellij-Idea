@@ -26,6 +26,10 @@ class GptInteraction {
         chatLog.add(message)
         chatLog.add(Message("system", chatGptResponse))
 
+        if (chatGptResponse.contains("Error code")) {
+            return chatGptResponse
+        }
+
         return responseLog.last().choices.first().message.content
     }
 
@@ -102,15 +106,30 @@ class GptInteraction {
         try {
             val response = client.newCall(request).execute()
 
-            println("response: $response")
+            println("res0: $response")
 
             if (!response.isSuccessful) {
-                return "Ocorreu um erro"
+                println("1")
+                val json = response.body?.string()
+                println("2")
+                val moshi = Moshi.Builder().build()
+                println("3")
+                val adapter = moshi.adapter(ErrorResponse::class.java)
+                println("4")
+                println(json)
+                val myResponse = adapter.fromJson(json!!) ?: return "didnt work"
+                println("5")
+
+
+                return "Error code: {${myResponse.error.code}}"
             }
+
+            println("res1: $response")
 
             val json = response.body?.string()
             val moshi = Moshi.Builder().build()
             val adapter = moshi.adapter(GPTResponse::class.java)
+            println(json)
             val myResponse = adapter.fromJson(json!!) ?: return ""
 
             client.connectionPool.evictAll()
@@ -120,7 +139,7 @@ class GptInteraction {
 
         } catch (exception : Exception) {
             //mostrar uma notificação a dizer que o chatgpt não respondeu
-            return ""
+            return "Erro desconhecido"
         }
     }
 }

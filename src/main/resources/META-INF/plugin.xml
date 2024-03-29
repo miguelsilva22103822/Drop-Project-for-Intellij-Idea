@@ -56,7 +56,19 @@
                                  id="org.dropProject.dropProjectPlugin.settings.SettingsConfigurable"
                                  displayName="Drop Project Settings"/>
         <applicationService serviceImplementation="org.dropProject.dropProjectPlugin.settings.SettingsState"/>
+
+
     </extensions>
-
-
+    <actions>
+        <action id="org.dropProject.dropProjectPlugin.gpt.SendToGptEditor"
+                class="org.dropProject.dropProjectPlugin.gpt.SendToGptEditor" text="Send to GPT"
+                description="Sends the selected text to the ChatGPT prompt input box">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+        <action id="org.dropProject.dropProjectPlugin.gpt.SendToGptConsole"
+                class="org.dropProject.dropProjectPlugin.gpt.SendToGptConsole" text="Send to GPT"
+                description="Sends the selected text to the ChatGPT prompt input box">
+            <add-to-group group-id="ConsoleEditorPopupMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>

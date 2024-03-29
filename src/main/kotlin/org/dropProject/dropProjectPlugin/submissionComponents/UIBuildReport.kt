@@ -1,10 +1,14 @@
 package org.dropProject.dropProjectPlugin.submissionComponents
 
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.editor.CaretModel
+import com.intellij.openapi.ui.Messages
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.panel
 import data.FullBuildReport
+import org.dropProject.dropProjectPlugin.settings.SettingsState
 import java.awt.Dimension
 import javax.swing.JViewport
 
@@ -75,6 +79,15 @@ internal class UIBuildReport {
                         group("Error $index") {
                             row {
                                 text(error)
+                                button("Send to ChatGPT") {
+                                    val uiGPT = UIGpt.getInstance()
+                                    uiGPT.addToPrompt(error)
+
+                                    val settingsState = SettingsState.getInstance()
+                                    if (settingsState.autoSendPrompt) {
+                                        uiGPT.sendPrompt()
+                                    }
+                                }
                             }
                         }
                     }

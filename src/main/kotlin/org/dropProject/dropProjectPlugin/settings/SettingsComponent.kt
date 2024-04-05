@@ -3,12 +3,19 @@ package org.dropProject.dropProjectPlugin.settings
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.*
 import com.intellij.util.ui.FormBuilder
-import org.dropProject.dropProjectPlugin.submissionComponents.UIGpt
-import org.jetbrains.annotations.NotNull
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.GridLayout
 import javax.swing.*
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.editor.CaretModel
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.ui.Messages
+import org.dropProject.dropProjectPlugin.settings.SettingsState
+import org.dropProject.dropProjectPlugin.submissionComponents.UIGpt
+import org.jetbrains.annotations.NotNull
 
 class SettingsComponent {
     private val mainPanel: JPanel
@@ -112,8 +119,8 @@ class SettingsComponent {
         if (sentence.isNotEmpty()) {
             sentenceListModel.addElement(sentence)
             sentenceTextField.text = ""
-            val uiGpt = UIGpt.getInstance()
-            uiGpt.addPhrase(sentence)
+            //val uiGpt = UIGpt.getInstance()
+            //uiGpt.addPhrase(sentence)
         }
     }
 
@@ -127,8 +134,8 @@ class SettingsComponent {
             )
             if (editedSentence != null) {
                 sentenceListModel.setElementAt(editedSentence, selectedIndex)
-                val uiGpt = UIGpt.getInstance()
-                uiGpt.editPhrase(selectedIndex + 1, editedSentence)
+                //val uiGpt = UIGpt.getInstance()
+                //uiGpt.editPhrase(selectedIndex + 1, editedSentence)
             }
         }
     }
@@ -139,8 +146,8 @@ class SettingsComponent {
             sentenceListModel.remove(selectedIndex)
         }
 
-        val uiGpt = UIGpt.getInstance()
-        uiGpt.removePhrase(selectedIndex + 1)
+        //val uiGpt = UIGpt.getInstance()
+        //uiGpt.removePhrase(selectedIndex + 1)
     }
 
     fun getPanel(): JPanel {

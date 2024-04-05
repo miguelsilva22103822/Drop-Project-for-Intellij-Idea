@@ -1,14 +1,17 @@
 package org.dropProject.dropProjectPlugin.gpt
 
+import com.intellij.openapi.project.Project
 import com.squareup.moshi.Moshi
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.dropProject.dropProjectPlugin.DefaultNotification
 import org.dropProject.dropProjectPlugin.settings.SettingsState
+import org.dropProject.dropProjectPlugin.toolWindow.DropProjectToolWindow
 import java.util.concurrent.TimeUnit
 
-class GptInteraction {
+class GptInteraction(var project: Project) {
 
     private var responseLog = ArrayList<GPTResponse>()
     private var chatLog = ArrayList<Message>()
@@ -70,6 +73,11 @@ class GptInteraction {
         val settingsState = SettingsState.getInstance()
         val apiKey = settingsState.openAiToken
 
+        if (apiKey == "") {
+            DefaultNotification.notify(project, "No API key set")
+            return "Error: No API key set"
+        }
+
 
         val apiUrl = "https://api.openai.com/v1/chat/completions"
 
@@ -109,17 +117,13 @@ class GptInteraction {
             println("res0: $response")
 
             if (!response.isSuccessful) {
-                println("1")
                 val json = response.body?.string()
-                println("2")
                 val moshi = Moshi.Builder().build()
-                println("3")
                 val adapter = moshi.adapter(ErrorResponse::class.java)
-                println("4")
                 println(json)
                 val myResponse = adapter.fromJson(json!!) ?: return "didnt work"
-                println("5")
 
+                DefaultNotification.notify(project, "Response unsuccseessful, no tokens")
 
                 return "Error code: {${myResponse.error.code}}"
             }

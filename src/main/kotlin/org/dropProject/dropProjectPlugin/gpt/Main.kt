@@ -2,6 +2,7 @@ package org.dropProject.dropProjectPlugin.gpt
 
 
 fun main() {
+    /*
     val gptInteraction = GptInteraction()
 
     println(gptInteraction.executePrompt("Hello, tell me a joke about cats"))
@@ -9,4 +10,5 @@ fun main() {
 
     println()
     println(gptInteraction.getChatLog())
+    */
 }

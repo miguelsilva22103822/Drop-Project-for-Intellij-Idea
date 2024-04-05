@@ -67,7 +67,7 @@ class ShowFullBuildReport(
         contentManager?.let {
             val tabbedPane = dropProjectToolWindow.tabbedPane
             val newTabContent =
-                UIBuildReport().buildComponents(fullBuildReport, submissionNum?.submissionNumber)
+                UIBuildReport(toolWindow.project).buildComponents(fullBuildReport, submissionNum?.submissionNumber)
             tabbedPane.setTabComponentAt(
                 tabbedPane.tabCount,
                 dropProjectToolWindow.createTabComponent(

@@ -1,5 +1,6 @@
 package org.dropProject.dropProjectPlugin.submissionComponents
 
+import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
@@ -10,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.dropProject.dropProjectPlugin.gpt.GptInteraction
 import org.dropProject.dropProjectPlugin.settings.SettingsState
+import org.dropProject.dropProjectPlugin.toolWindow.DropProjectToolWindow
 import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -110,9 +112,9 @@ class UIGpt {
 */
 
 
-class UIGpt {
+class UIGpt(var project: Project) {
 
-    var gptInteraction = GptInteraction()
+    var gptInteraction = GptInteraction(project)
     var textField = JBTextField()
     private var phrases = ArrayList<String>()
     private var sendButton = JButton()
@@ -325,10 +327,10 @@ class UIGpt {
     companion object {
         var instance1 : UIGpt? = null
 
-        fun getInstance() : UIGpt {
+        fun getInstance(project: Project) : UIGpt {
 
             if(instance1 == null) {
-                instance1 = UIGpt()
+                instance1 = UIGpt(project)
             }
             return instance1!!
         }

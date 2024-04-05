@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.CaretModel
 import com.intellij.openapi.ui.Messages
 import com.intellij.ui.components.JBLabel
+import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.dsl.builder.RowLayout
 import com.intellij.ui.dsl.builder.panel
@@ -13,7 +14,7 @@ import java.awt.Dimension
 import javax.swing.JViewport
 
 
-internal class UIBuildReport {
+internal class UIBuildReport(private val project: Project) {
     fun buildComponents(buildReport: FullBuildReport, submissionNumber: Int?): JBScrollPane {
         val panel = panel {
             row {
@@ -80,7 +81,7 @@ internal class UIBuildReport {
                             row {
                                 text(error)
                                 button("Send to ChatGPT") {
-                                    val uiGPT = UIGpt.getInstance()
+                                    val uiGPT = UIGpt.getInstance(project)
                                     uiGPT.addToPrompt(error)
 
                                     val settingsState = SettingsState.getInstance()

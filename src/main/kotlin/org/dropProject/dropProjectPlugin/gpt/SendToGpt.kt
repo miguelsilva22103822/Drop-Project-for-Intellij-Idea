@@ -25,7 +25,7 @@ class SendToGptEditor : AnAction() {
             //DropProjectToolWindow.sendToGpt(selectedText) apagar a funcao
             println(selectedText)
 
-            val uiGPT = UIGpt.getInstance()
+            val uiGPT = UIGpt.getInstance(e.project!!)
             uiGPT.addToPrompt(selectedText)
 
             val settingsState = SettingsState.getInstance()
@@ -51,7 +51,7 @@ class SendToGptConsole : AnAction() {
         if (selectedText != null) {
             println(selectedText)
 
-            val uiGPT = UIGpt.getInstance()
+            val uiGPT = UIGpt.getInstance(e.project!!)
             uiGPT.addToPrompt(selectedText)
 
             val settingsState = SettingsState.getInstance()

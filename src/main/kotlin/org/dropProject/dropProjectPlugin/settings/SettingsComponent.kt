@@ -1,21 +1,13 @@
 package org.dropProject.dropProjectPlugin.settings
 
 import com.intellij.ui.JBColor
+import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.*
 import com.intellij.util.ui.FormBuilder
-import java.awt.BorderLayout
-import java.awt.Dimension
-import java.awt.GridLayout
-import javax.swing.*
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.editor.CaretModel
-import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.ui.Messages
-import org.dropProject.dropProjectPlugin.settings.SettingsState
-import org.dropProject.dropProjectPlugin.submissionComponents.UIGpt
 import org.jetbrains.annotations.NotNull
+import java.awt.*
+import javax.swing.*
+
 
 class SettingsComponent {
     private val mainPanel: JPanel
@@ -40,6 +32,8 @@ class SettingsComponent {
     private val editButton = JButton("Edit")
     private val removeButton = JButton("Remove")
 
+    private val createOpenAiAccountButton = JButton("Create a new OpenAI account")
+
     init {
         // TOKEN FIELD AND SHOW CHECKBOX COMBINED
         tokenpanel.add(tokenField, BorderLayout.CENTER)
@@ -52,17 +46,10 @@ class SettingsComponent {
 
         // BUILD SETTINGS FORM
         mainPanel = FormBuilder.createFormBuilder()
-            .addLabeledComponent(JBLabel("Server URL: "), serverURL, 1, false)
-            .addLabeledComponent(JBLabel("Name: "), nameField, 1, false)
-            .addLabeledComponent(JBLabel("Number: "), numberField, 1, false)
-            .addLabeledComponent(JBLabel("Token: "), tokenpanel, 1, false)
-            .addLabeledComponent(JBLabel("OpenAI API Key: "), openAiTokenPanel, 1, false)
-            .addLabeledComponent(JBLabel("Ask ChatGPT: "), autoSendPrompt, 1, false)
-            .addLabeledComponent(JBLabel("ChatGPT - Messages to add to prompts"), sentenceTextField, 1, true)
-            .addComponent(createAddEditRemovePanel())
-            .addComponentFillVertically(JPanel(), 0)
+            .addComponent(createGeneralSettingsPanel(), 1)
+            .addComponent(createOpenAiSettingsPanel(), 1)
+            .addComponentFillVertically(createAddEditRemovePanel(), 1) // Add add/edit/remove panel
             .panel
-
 
         showToken.addActionListener {
             val checkbox = it.source as JCheckBox
@@ -87,29 +74,88 @@ class SettingsComponent {
         }
     }
 
-    private fun createAddEditRemovePanel(): JPanel {
+    private fun createGeneralSettingsPanel(): JPanel {
+        val panel = JPanel(BorderLayout())
+
+        panel.add(createSettingsLine("General Settings"), BorderLayout.NORTH)
+        panel.add(
+            FormBuilder.createFormBuilder()
+                .addLabeledComponent(JBLabel("Server URL: "), serverURL, 1, false)
+                .addLabeledComponent(JBLabel("Name: "), nameField, 1, false)
+                .addLabeledComponent(JBLabel("Number: "), numberField, 1, false)
+                .addLabeledComponent(JBLabel("Token: "), tokenpanel, 1, false)
+                .panel.apply {
+                    border = BorderFactory.createEmptyBorder(0, 20, 0, 0) // Add left indentation
+                }, BorderLayout.CENTER
+        )
+
+        return panel
+    }
+
+    private fun createOpenAiSettingsPanel(): JPanel {
+        val panel = JPanel(BorderLayout())
+
+        panel.add(createSettingsLine("OpenAI Settings"), BorderLayout.NORTH)
+        panel.add(
+            FormBuilder.createFormBuilder()
+                .addLabeledComponent(JBLabel("OpenAI API Key: "), openAiTokenPanel, 1, false)
+                .addLabeledComponent(JBLabel("Ask ChatGPT: "), autoSendPrompt, 1, false)
+                .addComponent(createOpenAiAccountButton)
+                .panel.apply {
+                    border = BorderFactory.createEmptyBorder(0, 20, 0, 0) // Add left indentation
+                }, BorderLayout.CENTER
+        )
+
+        return panel
+    }
+
+    private fun createSettingsLine(title: String): JPanel {
         val panel = JPanel()
-        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)  // Use BoxLayout with top-to-bottom alignment
+        panel.layout = BorderLayout()
+
+        val sep = TitledSeparator(title)
+
+        panel.add(sep, BorderLayout.CENTER)
+
+        return panel
+    }
+
+    private fun createAddEditRemovePanel(): JPanel {
+        val panel = JPanel(GridBagLayout())
+        val gbc = GridBagConstraints()
 
         val scrollPane = JBScrollPane(sentenceList)
         scrollPane.preferredSize = Dimension(0, 100)
 
-        val emptyBorder = BorderFactory.createEmptyBorder(3, 3, 3, 3) // Adjust the margins as needed
-        val lineBorder = BorderFactory.createLineBorder(JBColor(0xB5B5B5, 0x5C5C5C)) // You can adjust the color
+        val emptyBorder = BorderFactory.createEmptyBorder(3, 3, 3, 3)
+        val lineBorder = BorderFactory.createLineBorder(JBColor(0xB5B5B5, 0x5C5C5C))
         val compoundBorder = BorderFactory.createCompoundBorder(emptyBorder, lineBorder)
-
         scrollPane.border = compoundBorder
 
-        // Create a sub-panel for buttons with BoxLayout (default takes full width)
-        val buttonPanel = JPanel(GridLayout(1, 0))
+        // Adjust the preferred size to limit the height of the list
+        sentenceList.preferredSize = Dimension(300, 100)
 
+        // Create a sub-panel for buttons with GridLayout (equal-sized cells)
+        val buttonPanel = JPanel(GridLayout(1, 0))
         buttonPanel.add(addButton)
         buttonPanel.add(editButton)
         buttonPanel.add(removeButton)
 
-        panel.add(scrollPane)
-        panel.add(sentenceTextField)
-        panel.add(buttonPanel)
+        gbc.gridx = 0
+        gbc.gridy = 0
+        gbc.fill = GridBagConstraints.BOTH
+        gbc.weightx = 1.0
+        gbc.weighty = 1.0
+        panel.add(scrollPane, gbc)
+
+        gbc.gridy = 1
+        gbc.weighty = 0.0
+        panel.add(sentenceTextField, gbc)
+
+        gbc.gridy = 2
+        panel.add(buttonPanel, gbc)
+
+        panel.border = BorderFactory.createEmptyBorder(0, 20, 0, 0) // Add left indentation
 
         return panel
     }
@@ -119,8 +165,6 @@ class SettingsComponent {
         if (sentence.isNotEmpty()) {
             sentenceListModel.addElement(sentence)
             sentenceTextField.text = ""
-            //val uiGpt = UIGpt.getInstance()
-            //uiGpt.addPhrase(sentence)
         }
     }
 
@@ -134,8 +178,6 @@ class SettingsComponent {
             )
             if (editedSentence != null) {
                 sentenceListModel.setElementAt(editedSentence, selectedIndex)
-                //val uiGpt = UIGpt.getInstance()
-                //uiGpt.editPhrase(selectedIndex + 1, editedSentence)
             }
         }
     }
@@ -145,9 +187,6 @@ class SettingsComponent {
         if (selectedIndex != -1) {
             sentenceListModel.remove(selectedIndex)
         }
-
-        //val uiGpt = UIGpt.getInstance()
-        //uiGpt.removePhrase(selectedIndex + 1)
     }
 
     fun getPanel(): JPanel {
@@ -214,5 +253,4 @@ class SettingsComponent {
         sentenceListModel.clear()
         sentences.forEach { sentenceListModel.addElement(it) }
     }
-
 }

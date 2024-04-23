@@ -15,22 +15,24 @@ import java.util.concurrent.TimeUnit
 
 class GptInteraction(var project: Project) {
     private val model = "gpt-3.5-turbo"
-    private val responseLogFile = File("response_log.txt")
+    private val logFileDirectory = "${System.getProperty("user.home")}/Documents/Drop Project Plugin/"
+    private val logFile = File("${logFileDirectory}chat_log.txt")
     private var responseLog = ArrayList<GPTResponse>()
     private var chatLog = ArrayList<Message>()
     private var messages = mutableListOf(
         Message("system", "You are a helpful assistant"),
     )
 
-    fun executePrompt(prompt: String): String {
-        val message = Message("user", prompt)
+    init {
+        val directory = File(logFileDirectory)
+        if (!directory.exists()) {
+            directory.mkdirs()
+        }
+    }
 
-        responseLogFile.appendText(
-            "Author: User" + "\n" +
-                    "DateTime: ${java.time.LocalDateTime.now()}\n" +
-                    "Message: $prompt + \n\n"
-        )
-        println(responseLogFile.absolutePath)
+    fun executePrompt(prompt: String): String {
+
+        logMessageUser(prompt)
 
         val chatGptResponse = processPrompt()
 
@@ -42,45 +44,6 @@ class GptInteraction(var project: Project) {
         }
 
         return responseLog.last().choices.first().message.content
-    }
-
-    fun addPromptMessage(prompt: String) {
-        val message = Message("user", prompt)
-
-        messages.add(message)
-        chatLog.add(message)
-    }
-
-    fun getChatLog(): String {
-        var log = ""
-
-        for (message in chatLog) {
-            if (message.role == "user")
-            {
-                log += "User: " + message.content + "\n"
-            } else {
-                log += "ChatGPT: " + message.content + "\n"
-            }
-        }
-
-        return log
-    }
-
-    fun getChatLogHtml(): String {
-        var log = ""
-
-        for (message in chatLog) {
-            if (message.role == "user")
-            {
-                log += "User: " + message.content + "<br><br>"
-            } else {
-                log += "ChatGPT: " + message.content + "<br><br>"
-            }
-        }
-
-        log.removeSuffix("<br><br>")
-
-        return log
     }
 
     private fun processPrompt(): String {
@@ -140,8 +103,7 @@ class GptInteraction(var project: Project) {
 
                 DefaultNotification.notify(project, "Response unsuccseessful, no tokens")
 
-                responseLogFile.appendText(myResponse.error.message + "\n\n")
-                println(responseLogFile.absolutePath)
+                logMessageGpt(myResponse.error.message)
 
                 return "Error code: {${myResponse.error.code}}"
             }
@@ -158,13 +120,7 @@ class GptInteraction(var project: Project) {
 
             responseLog.add(myResponse)
 
-            responseLogFile.appendText(
-                "Author: ChatGPT" + "\n" +
-                    "Model: $model\n" +
-                    "DateTime: ${java.time.LocalDateTime.now()}\n" +
-                    "Message: ${myResponse.choices.first().message.content} + \n\n"
-            )
-            println(responseLogFile.absolutePath)
+            logMessageGpt(myResponse.choices.first().message.content)
 
             return myResponse.choices.first().message.content
 
@@ -173,4 +129,64 @@ class GptInteraction(var project: Project) {
             return "Erro desconhecido"
         }
     }
+
+    private fun logMessageGpt(message: String) {
+        println(logFile.absolutePath)
+        logFile.appendText(
+            "Author: ChatGPT" + "\n" +
+                    "Model: $model\n" +
+                    "DateTime: ${java.time.LocalDateTime.now()}\n" +
+                    "Message: $message\n\n"
+        )
+    }
+
+    private fun logMessageUser(prompt: String) {
+        println(logFile.absolutePath)
+
+        logFile.appendText(
+            "Author: User" + "\n" +
+                    "DateTime: ${java.time.LocalDateTime.now()}\n" +
+                    "Message: $prompt\n\n"
+        )
+    }
+
+    fun addPromptMessage(prompt: String) {
+        val message = Message("user", prompt)
+
+        messages.add(message)
+        chatLog.add(message)
+    }
+
+    fun getChatLog(): String {
+        var log = ""
+
+        for (message in chatLog) {
+            if (message.role == "user")
+            {
+                log += "User: " + message.content + "\n"
+            } else {
+                log += "ChatGPT: " + message.content + "\n"
+            }
+        }
+
+        return log
+    }
+
+    fun getChatLogHtml(): String {
+        var log = ""
+
+        for (message in chatLog) {
+            if (message.role == "user")
+            {
+                log += "User: " + message.content + "<br><br>"
+            } else {
+                log += "ChatGPT: " + message.content + "<br><br>"
+            }
+        }
+
+        log.removeSuffix("<br><br>")
+
+        return log
+    }
+
 }

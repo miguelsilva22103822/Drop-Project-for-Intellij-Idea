@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.dropProject.dropProjectPlugin.gpt.GptInteraction
 import org.dropProject.dropProjectPlugin.settings.SettingsState
-import org.dropProject.dropProjectPlugin.toolWindow.DropProjectToolWindow
 import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -165,22 +164,34 @@ class UIGpt(var project: Project) {
 
                     val escapedMessage = escapeKotlinSpecialCharacters(message)
 
+                    textField.text = ""
+
                     // Start a coroutine to perform the GPT interaction
                     scope.launch(Dispatchers.Default) {
                         // Execute GPT interaction in the background
                         //print(escapedMessage)
-                        val response = gptInteraction.executePrompt(escapedMessage)
+                        gptInteraction.addPromptMessage(escapedMessage)
 
-                        // Convert Markdown to HTML in the background
                         val markdownResponse = gptInteraction.getChatLogHtml()
                         val parser = Parser.builder().build()
                         val document = parser.parse(markdownResponse)
                         val htmlRenderer = HtmlRenderer.builder().build()
                         val htmlResponse = htmlRenderer.render(document)
 
+                        responseArea.text = "$cssStyle$htmlResponse"
+
+                        val response = gptInteraction.executePrompt(escapedMessage)
+
+                        // Convert Markdown to HTML in the background
+                        val markdownResponse1 = gptInteraction.getChatLogHtml()
+                        val parser1 = Parser.builder().build()
+                        val document1 = parser1.parse(markdownResponse1)
+                        val htmlRenderer1 = HtmlRenderer.builder().build()
+                        val htmlResponse1 = htmlRenderer1.render(document1)
+
 
                         SwingUtilities.invokeLater {
-                            responseArea.text = "$cssStyle$htmlResponse"
+                            responseArea.text = "$cssStyle$htmlResponse1"
                             sendButton.isEnabled = true
                         }
 

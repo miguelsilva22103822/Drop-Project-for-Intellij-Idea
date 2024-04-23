@@ -8,11 +8,14 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.dropProject.dropProjectPlugin.DefaultNotification
 import org.dropProject.dropProjectPlugin.settings.SettingsState
-import org.dropProject.dropProjectPlugin.toolWindow.DropProjectToolWindow
+import java.io.File
 import java.util.concurrent.TimeUnit
 
-class GptInteraction(var project: Project) {
 
+
+class GptInteraction(var project: Project) {
+    private val model = "gpt-3.5-turbo"
+    private val responseLogFile = File("response_log.txt")
     private var responseLog = ArrayList<GPTResponse>()
     private var chatLog = ArrayList<Message>()
     private var messages = mutableListOf(
@@ -22,18 +25,30 @@ class GptInteraction(var project: Project) {
     fun executePrompt(prompt: String): String {
         val message = Message("user", prompt)
 
-        messages.add(message)
+        responseLogFile.appendText(
+            "Author: User" + "\n" +
+                    "DateTime: ${java.time.LocalDateTime.now()}\n" +
+                    "Message: $prompt + \n\n"
+        )
+        println(responseLogFile.absolutePath)
+
         val chatGptResponse = processPrompt()
 
         //add prompt and response to chatLog
-        chatLog.add(message)
         chatLog.add(Message("system", chatGptResponse))
 
-        if (chatGptResponse.contains("Error code")) {
+        if (chatGptResponse.contains("Error")) {
             return chatGptResponse
         }
 
         return responseLog.last().choices.first().message.content
+    }
+
+    fun addPromptMessage(prompt: String) {
+        val message = Message("user", prompt)
+
+        messages.add(message)
+        chatLog.add(message)
     }
 
     fun getChatLog(): String {
@@ -93,7 +108,7 @@ class GptInteraction(var project: Project) {
         val requestBody =
             """
             {
-                "model": "gpt-3.5-turbo",
+                "model": "$model",
                 "messages": [$messagesJson]
             }
             """.trimIndent()
@@ -125,6 +140,9 @@ class GptInteraction(var project: Project) {
 
                 DefaultNotification.notify(project, "Response unsuccseessful, no tokens")
 
+                responseLogFile.appendText(myResponse.error.message + "\n\n")
+                println(responseLogFile.absolutePath)
+
                 return "Error code: {${myResponse.error.code}}"
             }
 
@@ -139,6 +157,15 @@ class GptInteraction(var project: Project) {
             client.connectionPool.evictAll()
 
             responseLog.add(myResponse)
+
+            responseLogFile.appendText(
+                "Author: ChatGPT" + "\n" +
+                    "Model: $model\n" +
+                    "DateTime: ${java.time.LocalDateTime.now()}\n" +
+                    "Message: ${myResponse.choices.first().message.content} + \n\n"
+            )
+            println(responseLogFile.absolutePath)
+
             return myResponse.choices.first().message.content
 
         } catch (exception : Exception) {

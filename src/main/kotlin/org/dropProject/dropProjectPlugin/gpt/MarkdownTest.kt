@@ -72,7 +72,7 @@ class MarkdownRenderer : JFrame() {
 
         val path = System.getProperty("user.dir")
 
-        println("Working Directory = $path")
+        //println("Working Directory = $path")
 
 
         val jSPath = "resources/prism.js"

@@ -9,13 +9,15 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.dropProject.dropProjectPlugin.DefaultNotification
 import org.dropProject.dropProjectPlugin.settings.SettingsState
 import java.io.File
+import java.nio.file.FileSystems
 import java.util.concurrent.TimeUnit
 
 
 
 class GptInteraction(var project: Project) {
     private val model = "gpt-3.5-turbo"
-    private val logFileDirectory = "${System.getProperty("user.home")}/Documents/Drop Project Plugin/"
+    private val separator = FileSystems.getDefault().separator
+    private val logFileDirectory = "${System.getProperty("user.home")}${separator}Documents${separator}Drop Project Plugin${separator}"
     private val logFile = File("${logFileDirectory}chat_log.txt")
     private var responseLog = ArrayList<GPTResponse>()
     private var chatLog = ArrayList<Message>()
@@ -92,13 +94,13 @@ class GptInteraction(var project: Project) {
         try {
             val response = client.newCall(request).execute()
 
-            println("res0: $response")
+            //println("res0: $response")
 
             if (!response.isSuccessful) {
                 val json = response.body?.string()
                 val moshi = Moshi.Builder().build()
                 val adapter = moshi.adapter(ErrorResponse::class.java)
-                println(json)
+                //println(json)
                 val myResponse = adapter.fromJson(json!!) ?: return "didnt work"
 
                 DefaultNotification.notify(project, "Response unsuccseessful, no tokens")
@@ -108,12 +110,12 @@ class GptInteraction(var project: Project) {
                 return "Error code: {${myResponse.error.code}}"
             }
 
-            println("res1: $response")
+            //println("res1: $response")
 
             val json = response.body?.string()
             val moshi = Moshi.Builder().build()
             val adapter = moshi.adapter(GPTResponse::class.java)
-            println(json)
+            //println(json)
             val myResponse = adapter.fromJson(json!!) ?: return ""
 
             client.connectionPool.evictAll()
@@ -131,7 +133,7 @@ class GptInteraction(var project: Project) {
     }
 
     private fun logMessageGpt(message: String) {
-        println(logFile.absolutePath)
+        //println(logFile.absolutePath)
         logFile.appendText(
             "Author: ChatGPT" + "\n" +
                     "Model: $model\n" +
@@ -141,7 +143,7 @@ class GptInteraction(var project: Project) {
     }
 
     private fun logMessageUser(prompt: String) {
-        println(logFile.absolutePath)
+        //println(logFile.absolutePath)
 
         logFile.appendText(
             "Author: User" + "\n" +

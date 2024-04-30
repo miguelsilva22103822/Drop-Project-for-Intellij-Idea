@@ -4,6 +4,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.*
 import com.intellij.util.ui.FormBuilder
+import org.dropProject.dropProjectPlugin.submissionComponents.UIGpt
 import org.jetbrains.annotations.NotNull
 import java.awt.*
 import javax.swing.*
@@ -43,6 +44,10 @@ class SettingsComponent {
         openAiTokenPanel.add(showOpenAiToken, BorderLayout.EAST)
 
         sentenceTextField.emptyText.text = "Text to be added at the end of the prompt"
+
+        if (sentenceListModel.isEmpty || sentenceListModel.size == 1) {
+            populateDefaultSentences()
+        }
 
         // BUILD SETTINGS FORM
         mainPanel = FormBuilder.createFormBuilder()
@@ -109,6 +114,13 @@ class SettingsComponent {
         return panel
     }
 
+    private fun populateDefaultSentences() {
+        val defaultSentences = listOf("Find the bug", "Improve the performance", "Explain this code", "Write tests for this function")
+        defaultSentences.forEach {
+            sentenceListModel.addElement(it)
+        }
+    }
+
     private fun createSettingsLine(title: String): JPanel {
         val panel = JPanel()
         panel.layout = BorderLayout()
@@ -166,6 +178,8 @@ class SettingsComponent {
             sentenceListModel.addElement(sentence)
             sentenceTextField.text = ""
         }
+
+        UIGpt.getInstance().updatePhrases()
     }
 
     private fun editSentence() {

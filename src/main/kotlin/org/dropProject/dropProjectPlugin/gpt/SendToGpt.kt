@@ -23,7 +23,7 @@ class SendToGptEditor : AnAction() {
         // Execute your function with the selected code
         if (selectedText != null) {
             //DropProjectToolWindow.sendToGpt(selectedText) apagar a funcao
-            println(selectedText)
+            //println(selectedText)
 
             val uiGPT = UIGpt.getInstance(e.project!!)
             uiGPT.addToPrompt(selectedText)
@@ -49,7 +49,7 @@ class SendToGptConsole : AnAction() {
         val selectedText: String? = caretModel?.currentCaret?.selectedText
 
         if (selectedText != null) {
-            println(selectedText)
+            //println(selectedText)
 
             val uiGPT = UIGpt.getInstance(e.project!!)
             uiGPT.addToPrompt(selectedText)

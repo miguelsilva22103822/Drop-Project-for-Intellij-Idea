@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.gradleIntelliJPlugin) // Gradle IntelliJ Plugin
     id("org.jetbrains.kotlinx.kover") version "0.7.3"
     id("com.google.devtools.ksp").version("1.9.10-1.0.13")
-
 }
 
 group = "org.dropProject"
@@ -30,6 +29,8 @@ dependencies {
     implementation("com.atlassian.commonmark:commonmark:0.17.0")
     //implementation("org.commonmark:0.21.0")
     implementation("me.friwi:jcefmaven:116.0.19.1")
+    implementation("org.openjfx:javafx-controls:17")
+    implementation("org.openjfx:javafx-web:17")
 
 }
 kotlin {

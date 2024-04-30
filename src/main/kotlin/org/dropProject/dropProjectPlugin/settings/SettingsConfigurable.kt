@@ -1,6 +1,7 @@
 package org.dropProject.dropProjectPlugin.settings
 
 import com.intellij.openapi.options.Configurable
+import org.dropProject.dropProjectPlugin.submissionComponents.UIGpt
 import org.jetbrains.annotations.Nls
 import javax.swing.JComponent
 
@@ -41,6 +42,7 @@ class SettingsConfigurable : Configurable {
         settings.openAiToken = mySettingsComponent?.getOpenAiTokenField()!!
         settings.autoSendPrompt = mySettingsComponent?.isAutoSendPromptSelected() ?: false
         settings.sentenceList = (mySettingsComponent?.getSentenceList() as MutableList<String>?)!!
+        UIGpt.instance1?.updatePhrases()
     }
 
     override fun reset() {
@@ -52,6 +54,12 @@ class SettingsConfigurable : Configurable {
         settings.openAiToken.let { mySettingsComponent?.setOpenAiTokenField(it) }
         settings.autoSendPrompt.let { mySettingsComponent?.setAutoSendPrompt(it) }
         settings.sentenceList.let { mySettingsComponent?.setSentenceList(it) }
+        settings.sentenceList.let {
+            if (it.isEmpty()|| it.size == 1) {
+                it.addAll(listOf("Find the bug", "Improve the performance", "Explain this code", "Write tests for this function"))
+            }
+            mySettingsComponent?.setSentenceList(it)
+        }
     }
 
     override fun disposeUIResources() {

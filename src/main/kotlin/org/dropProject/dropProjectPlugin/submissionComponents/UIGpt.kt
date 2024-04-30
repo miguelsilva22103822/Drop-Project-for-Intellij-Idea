@@ -1,5 +1,8 @@
 package org.dropProject.dropProjectPlugin.submissionComponents
 
+import com.intellij.diff.DiffContentFactory
+import com.intellij.diff.DiffManager
+import com.intellij.diff.requests.SimpleDiffRequest
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextField
@@ -15,6 +18,8 @@ import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
+import javax.swing.text.html.HTMLEditorKit
+
 
 /*
 class UIGpt {
@@ -113,33 +118,38 @@ class UIGpt {
 
 class UIGpt(var project: Project) {
 
-    var gptInteraction = GptInteraction(project)
-    var textField = JBTextField()
+
+    private var gptInteraction = GptInteraction(project)
+    private var textField = JBTextField()
     private var phrases = ArrayList<String>()
     private var sendButton = JButton()
     private var phraseComboBox = JComboBox(phrases.toTypedArray())
     private val responseArea = JEditorPane()
     private var inputAndSubmitPanel = JPanel(GridBagLayout())
     private var uI: JBScrollPane = JBScrollPane()
-    val cssStyle =
-        """
-            <style>
-                body {
-                    font-family: Arial, sans-serif; /* Set the base font-family */
-                    font-size: 12px; /* Set the base font size */
-                }
-            </style>
-            """
+    private var chatTextToShow = ""
+    private val cssStyle = """
+        <style>
+            * {
+                font-family: Consolas, 'Courier New', monospace;
+                font-size: 14px;
+            }
+        </style>
+    """.trimIndent()
+
+    private var askTwice = true;
 
     init {
         textField.emptyText.text = "Send a message"
         textField.preferredSize = Dimension(400, 30)  // Set a preferred size for the textField
 
 
-
         responseArea.contentType = "text/html"
-        responseArea.text = "$cssStyle<html><body></body></html>"
-
+        responseArea.setEditorKit(HTMLEditorKit())
+        val baseFont = Font("Arial", Font.PLAIN, 15) // Change this to your desired font
+        responseArea.setFont(baseFont)
+        responseArea.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true)
+        responseArea.text = cssStyle
         responseArea.isEditable = false
 
         val settingsState = SettingsState.getInstance()
@@ -155,49 +165,7 @@ class UIGpt(var project: Project) {
 
         sendButton = JButton("Send Message")
         sendButton.addMouseListener(object : MouseAdapter() {
-            override fun mousePressed(e: MouseEvent?) {
-                if (textField.text != null && textField.text != "") {
-                    sendButton.isEnabled = false
-
-                    val selectedPhrase = phraseComboBox.selectedItem as String
-                    val message = "${textField.text} $selectedPhrase"
-
-                    val escapedMessage = escapeKotlinSpecialCharacters(message)
-
-                    textField.text = ""
-
-                    // Start a coroutine to perform the GPT interaction
-                    scope.launch(Dispatchers.Default) {
-                        // Execute GPT interaction in the background
-                        //print(escapedMessage)
-                        gptInteraction.addPromptMessage(escapedMessage)
-
-                        val markdownResponse = gptInteraction.getChatLogHtml()
-                        val parser = Parser.builder().build()
-                        val document = parser.parse(markdownResponse)
-                        val htmlRenderer = HtmlRenderer.builder().build()
-                        val htmlResponse = htmlRenderer.render(document)
-
-                        responseArea.text = "$cssStyle$htmlResponse"
-
-                        val response = gptInteraction.executePrompt(escapedMessage)
-
-                        // Convert Markdown to HTML in the background
-                        val markdownResponse1 = gptInteraction.getChatLogHtml()
-                        val parser1 = Parser.builder().build()
-                        val document1 = parser1.parse(markdownResponse1)
-                        val htmlRenderer1 = HtmlRenderer.builder().build()
-                        val htmlResponse1 = htmlRenderer1.render(document1)
-
-
-                        SwingUtilities.invokeLater {
-                            responseArea.text = "$cssStyle$htmlResponse1"
-                            sendButton.isEnabled = true
-                        }
-
-                    }
-                }
-            }
+            override fun mousePressed(e: MouseEvent?) = sendPrompt()
         })
 
 
@@ -261,7 +229,7 @@ class UIGpt(var project: Project) {
         return uI
     }
 
-    fun escapeKotlinSpecialCharacters(input: String): String {
+    private fun escapeKotlinSpecialCharacters(input: String): String {
         // Define the characters to be escaped
         val specialCharacters = setOf("\\", "$", "\"", "'", "\n", "\r", "\t", "\b", "\u000c")
 
@@ -289,26 +257,64 @@ class UIGpt(var project: Project) {
 
             val escapedMessage = escapeKotlinSpecialCharacters(message)
 
+            textField.text = ""
+
             // Start a coroutine to perform the GPT interaction
             scope.launch(Dispatchers.Default) {
-                // Execute GPT interaction in the background
-                //print(escapedMessage)
-                val response = gptInteraction.executePrompt(escapedMessage)
 
-                // Convert Markdown to HTML in the background
-                val markdownResponse = gptInteraction.getChatLogHtml()
-                val parser = Parser.builder().build()
-                val document = parser.parse(markdownResponse)
-                val htmlRenderer = HtmlRenderer.builder().build()
-                val htmlResponse = htmlRenderer.render(document)
+                //Adding the prompt that is being sent
+                gptInteraction.addPromptMessage(escapedMessage)
+                chatTextToShow += "<p>User: $escapedMessage</p>\n"
+
+                updateChatScreen()
+
+                val response = gptInteraction.executePrompt(escapedMessage)
+                //Adding the response
+                chatTextToShow += "<p>ChatGPT: $response</p>\n"
+                updateChatScreen()
+
+                if (askTwice) {
+                    val altResponse = gptInteraction.executePrompt(escapedMessage)
+
+                    chatTextToShow += "<p>ChatGPT (ALternative Response): $altResponse</p>\n"
+                    updateChatScreen()
+
+                    SwingUtilities.invokeLater {
+                        openDiffViewer(response, altResponse)
+                    }
+                }
 
                 SwingUtilities.invokeLater {
-                    responseArea.text = "$cssStyle$htmlResponse"
                     sendButton.isEnabled = true
                 }
 
             }
         }
+    }
+
+    private fun openDiffViewer(response1: String, response2: String) {
+        val project = project
+
+        val content1 = DiffContentFactory.getInstance().create(project, response1)
+        val content2 = DiffContentFactory.getInstance().create(project, response2)
+
+        val request = SimpleDiffRequest("Response Comparison", content1, content2, "Original Response", "Alternative Response")
+        DiffManager.getInstance().showDiff(project, request)
+    }
+
+    private fun updateChatScreen() {
+
+        val htmlCrazyWooo = "$cssStyle\n" +
+                "$chatTextToShow\n"
+
+        val parser = Parser.builder().build()
+        val document = parser.parse(htmlCrazyWooo)
+        val htmlRenderer = HtmlRenderer.builder().build()
+        val htmlResponse = htmlRenderer.render(document)
+
+        responseArea.text = htmlResponse
+
+        println(htmlResponse)
     }
 
     fun updatePhrases() {

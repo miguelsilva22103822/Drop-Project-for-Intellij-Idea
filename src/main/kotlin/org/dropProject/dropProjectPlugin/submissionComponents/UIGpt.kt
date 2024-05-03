@@ -7,8 +7,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
-import com.vladsch.flexmark.html.HtmlRenderer
-import com.vladsch.flexmark.parser.Parser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -127,17 +125,9 @@ class UIGpt(var project: Project) {
     private val responseArea = JEditorPane()
     private var inputAndSubmitPanel = JPanel(GridBagLayout())
     private var uI: JBScrollPane = JBScrollPane()
-    private var chatTextToShow = ""
-    private val cssStyle = """
-        <style>
-            * {
-                font-family: Consolas, 'Courier New', monospace;
-                font-size: 14px;
-            }
-        </style>
-    """.trimIndent()
+    private var chatHtml = ChatHtmlBuilder()
 
-    private var askTwice = true;
+    private var askTwice = false
 
     init {
         textField.emptyText.text = "Send a message"
@@ -149,7 +139,7 @@ class UIGpt(var project: Project) {
         val baseFont = Font("Arial", Font.PLAIN, 15) // Change this to your desired font
         responseArea.setFont(baseFont)
         responseArea.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true)
-        responseArea.text = cssStyle
+        responseArea.text = chatHtml.getHtmlChat()
         responseArea.isEditable = false
 
         val settingsState = SettingsState.getInstance()
@@ -199,11 +189,14 @@ class UIGpt(var project: Project) {
 // Set preferred size for the panel
         inputAndSubmitPanel.preferredSize = Dimension(600, 90) // Increased height to accommodate the taller button
 
+
+        responseArea.size = Dimension(200, -1)
 // Add the panel and response area to the main panel
         val panel = JPanel()
         panel.layout = BorderLayout()
         panel.add(responseArea, BorderLayout.CENTER)
         panel.add(inputAndSubmitPanel, BorderLayout.SOUTH)
+        panel.size = Dimension(800, -1)
 
 // Set up the scroll pane
         val scrollPane = JBScrollPane(panel)
@@ -229,17 +222,27 @@ class UIGpt(var project: Project) {
         return uI
     }
 
+
+    /*
     private fun escapeKotlinSpecialCharacters(input: String): String {
         // Define the characters to be escaped
-        val specialCharacters = setOf("\\", "$", "\"", "'", "\n", "\r", "\t", "\b", "\u000c")
+        val specialCharacters = setOf("\\", "$", "\"", "\n", "\r", "\t", "\b", "\u000c")
 
         // Escape each special character
         var escaped = input
         for (character in specialCharacters) {
-            escaped = escaped.replace(character, "\\$character")
+            //escaped = escaped.replace(character, "\\$character")
+            escaped = escaped.replace(character, "") // TEST if it woorks well now
         }
 
+        escaped = escaped.replace("'", "") //for some reason this character breaks everything
+
         return escaped
+    }
+    */
+
+    private fun escapeKotlinSpecialCharacters(input: String): String {
+        return input.replace("[\\\\$\"\\n\\r\\t\b\\u000c']".toRegex(), "")
     }
 
     fun addToPrompt(text : String) {
@@ -264,19 +267,19 @@ class UIGpt(var project: Project) {
 
                 //Adding the prompt that is being sent
                 gptInteraction.addPromptMessage(escapedMessage)
-                chatTextToShow += "<p>User: $escapedMessage</p>\n"
-
+                chatHtml.append("User", escapedMessage, true)
                 updateChatScreen()
 
                 val response = gptInteraction.executePrompt(escapedMessage)
                 //Adding the response
-                chatTextToShow += "<p>ChatGPT: $response</p>\n"
+
+                chatHtml.append("ChatGPT", response, false)
                 updateChatScreen()
 
                 if (askTwice) {
                     val altResponse = gptInteraction.executePrompt(escapedMessage)
 
-                    chatTextToShow += "<p>ChatGPT (ALternative Response): $altResponse</p>\n"
+                    chatHtml.append("ChatGPT", altResponse, false)
                     updateChatScreen()
 
                     SwingUtilities.invokeLater {
@@ -303,18 +306,8 @@ class UIGpt(var project: Project) {
     }
 
     private fun updateChatScreen() {
-
-        val htmlCrazyWooo = "$cssStyle\n" +
-                "$chatTextToShow\n"
-
-        val parser = Parser.builder().build()
-        val document = parser.parse(htmlCrazyWooo)
-        val htmlRenderer = HtmlRenderer.builder().build()
-        val htmlResponse = htmlRenderer.render(document)
-
-        responseArea.text = htmlResponse
-
-        println(htmlResponse)
+        responseArea.text = chatHtml.getHtmlChat()
+        println(chatHtml.getHtmlChat())
     }
 
     fun updatePhrases() {

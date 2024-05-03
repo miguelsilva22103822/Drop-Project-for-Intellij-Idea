@@ -4,7 +4,6 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.*
 import com.intellij.util.ui.FormBuilder
-import org.dropProject.dropProjectPlugin.submissionComponents.UIGpt
 import org.jetbrains.annotations.NotNull
 import java.awt.*
 import javax.swing.*
@@ -179,7 +178,7 @@ class SettingsComponent {
             sentenceTextField.text = ""
         }
 
-        UIGpt.getInstance().updatePhrases()
+        //needs to update the interface
     }
 
     private fun editSentence() {
@@ -194,6 +193,8 @@ class SettingsComponent {
                 sentenceListModel.setElementAt(editedSentence, selectedIndex)
             }
         }
+
+        //needs to update the interface
     }
 
     private fun removeSentence() {
@@ -201,6 +202,8 @@ class SettingsComponent {
         if (selectedIndex != -1) {
             sentenceListModel.remove(selectedIndex)
         }
+
+        //needs to update the interface
     }
 
     fun getPanel(): JPanel {

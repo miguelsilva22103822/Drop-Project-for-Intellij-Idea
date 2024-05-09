@@ -1,7 +1,9 @@
 package org.dropProject.dropProjectPlugin.submissionComponents
 
+import com.intellij.util.ui.StyleSheetUtil
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.Parser
+import javax.swing.text.html.StyleSheet
 
 class ChatHtmlBuilder {
     private var cssStyle = "<style>\n" +
@@ -45,7 +47,7 @@ class ChatHtmlBuilder {
 
     private var content = StringBuilder("<table>")
     fun getHtmlChat(): String {
-        return "$cssStyle$content</table>\n"
+        return "$content</table>\n"
     }
     fun append(user: String, message: String, isUser: Boolean) {
         content.append("<tr>")
@@ -68,4 +70,43 @@ class ChatHtmlBuilder {
 
         return htmlResponse
     }
+
+    public fun getStyle(): StyleSheet = StyleSheetUtil.loadStyleSheet("""
+    * {
+        margin: 0;
+        padding: 0;
+        font-family: Consolas, 'Courier New', monospace;
+        font-size: 10px;
+        word-wrap: break-word;
+    }
+    table {
+        width: 80%; /* Adjust table width as needed */
+        border-collapse: collapse;
+    }
+    p {
+        word-wrap: break-word;
+    }
+    td, th {
+        padding: 8px; /* Add padding for better readability */
+        word-wrap: break-word; /* Wrap long words */
+        max-width: 400px; /* Limit the maximum width */
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid #ccc;
+    }
+    .user-column {
+        width: 4%;
+        font-weight: bold;
+        color: rgb(150, 255, 150);
+    }
+    .message-column {
+        width: 96%;
+        color: #ffffff; /* Set text color for contrast */
+        /*background-color: #000000; Set background color */
+    }
+    .chatgpt-column {
+        font-weight: bold;
+        color: rgb(100, 255, 255);
+    }
+    """.trimIndent())
 }

@@ -4,19 +4,24 @@ import com.intellij.diff.DiffContentFactory
 import com.intellij.diff.DiffManager
 import com.intellij.diff.requests.SimpleDiffRequest
 import com.intellij.openapi.project.Project
+import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextField
+import com.intellij.util.ui.HTMLEditorKitBuilder
 import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.dropProject.dropProjectPlugin.gpt.GptInteraction
 import org.dropProject.dropProjectPlugin.settings.SettingsState
-import java.awt.*
+import java.awt.BorderLayout
+import java.awt.Dimension
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
-import javax.swing.text.html.HTMLEditorKit
 
 
 /*
@@ -134,13 +139,25 @@ class UIGpt(var project: Project) {
         textField.preferredSize = Dimension(400, 30)  // Set a preferred size for the textField
 
 
-        responseArea.contentType = "text/html"
-        responseArea.setEditorKit(HTMLEditorKit())
-        val baseFont = Font("Arial", Font.PLAIN, 15) // Change this to your desired font
-        responseArea.setFont(baseFont)
-        responseArea.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, true)
-        responseArea.text = chatHtml.getHtmlChat()
-        responseArea.isEditable = false
+        responseArea.apply {
+            contentType = "text/html"
+
+            editorKit = HTMLEditorKitBuilder().build().also {
+                it.styleSheet.addStyleSheet(chatHtml.getStyle())
+            }
+
+            isEditable = false
+            foreground = JBColor.foreground()
+            isOpaque = false
+            text = chatHtml.getHtmlChat()
+
+            UIUtil.doNotScrollToCaret(this)
+            UIUtil.invokeLaterIfNeeded {
+                revalidate()
+                setCaretPosition(document.length)
+            }
+
+        }
 
         val settingsState = SettingsState.getInstance()
         phrases = ArrayList(settingsState.sentenceList)
@@ -163,31 +180,50 @@ class UIGpt(var project: Project) {
         val textFieldConstraints = GridBagConstraints()
         textFieldConstraints.fill = GridBagConstraints.HORIZONTAL
         textFieldConstraints.weightx = 1.0
-        textFieldConstraints.gridwidth = 2 // Span two columns
+        textFieldConstraints.gridwidth = 3 // Span three columns
         textFieldConstraints.insets = JBUI.insets(3) // Custom padding
+        textFieldConstraints.gridx = 0 // Place at column 0
+        textFieldConstraints.gridy = 0 // Place in the first row
 
         val phraseComboBoxConstraints = GridBagConstraints()
         phraseComboBoxConstraints.fill = GridBagConstraints.HORIZONTAL
-        phraseComboBoxConstraints.weightx = 1.0
+        phraseComboBoxConstraints.weightx = 0.5
         phraseComboBoxConstraints.insets = JBUI.insets(3) // Custom padding
         phraseComboBoxConstraints.gridx = 0 // Place at column 0
-        phraseComboBoxConstraints.gridy = 1 // Place below the text field
+        phraseComboBoxConstraints.gridy = 1 // Place in the second row
+
+        val checkBoxConstraints = GridBagConstraints()
+        checkBoxConstraints.fill = GridBagConstraints.HORIZONTAL
+        checkBoxConstraints.weightx = 0.1 // Increased weightx value
+        checkBoxConstraints.insets = JBUI.insets(3, 30, 3, 3) // Add more padding to the right
+        checkBoxConstraints.gridx = 1 // Place at column 1
+        checkBoxConstraints.gridy = 1 // Place in the second row
 
         val sendButtonConstraints = GridBagConstraints()
-        sendButtonConstraints.fill = GridBagConstraints.BOTH // Make the button occupy 2 lines
+        sendButtonConstraints.fill = GridBagConstraints.HORIZONTAL
+        sendButtonConstraints.weightx = 1.0
+        sendButtonConstraints.gridwidth = 3 // Span three columns
         sendButtonConstraints.insets = JBUI.insets(3) // Custom padding
-        sendButtonConstraints.gridx = 2 // Place at column 2
-        sendButtonConstraints.gridy = 0 // Place in the first row
-        sendButtonConstraints.gridheight = 2 // Span 2 rows
+        sendButtonConstraints.gridx = 0 // Place at column 0
+        sendButtonConstraints.gridy = 2 // Place in the third row
+// Add checkbox to the panel with constraints
+        val askTwiceCheckBox = JCheckBox("Ask for 2 solutions")
+
+
+// Listener for checkbox state change
+        askTwiceCheckBox.addActionListener { _ ->
+            askTwice = askTwiceCheckBox.isSelected
+        }
 
 // Add components to the panel with constraints
         inputAndSubmitPanel = JPanel(GridBagLayout())
         inputAndSubmitPanel.add(textField, textFieldConstraints)
         inputAndSubmitPanel.add(phraseComboBox, phraseComboBoxConstraints)
-        inputAndSubmitPanel.add(sendButton, sendButtonConstraints)
+        inputAndSubmitPanel.add(askTwiceCheckBox, checkBoxConstraints) // Add checkbox in the second column
+        inputAndSubmitPanel.add(sendButton, sendButtonConstraints) // Add send button in the third column
 
 // Set preferred size for the panel
-        inputAndSubmitPanel.preferredSize = Dimension(600, 90) // Increased height to accommodate the taller button
+        inputAndSubmitPanel.preferredSize = Dimension(600, 140) // Increased height to accommodate the taller button
 
 
         responseArea.size = Dimension(200, -1)

@@ -1,5 +1,6 @@
 package org.dropProject.dropProjectPlugin.gpt
 
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.squareup.moshi.Moshi
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -13,12 +14,12 @@ import java.nio.file.FileSystems
 import java.util.concurrent.TimeUnit
 
 
-
 class GptInteraction(var project: Project) {
     private val model = "gpt-3.5-turbo"
     private val separator = FileSystems.getDefault().separator
-    private val logFileDirectory = "${System.getProperty("user.home")}${separator}Documents${separator}Drop Project Plugin${separator}"
-    private val logFile = File("${logFileDirectory}chat_log.txt")
+    //private val logFileDirectory = "${System.getProperty("user.home")}${separator}Documents${separator}Drop Project Plugin${separator}"
+    private val logFileDirectory = project.let { FileEditorManager.getInstance(it).project.basePath.toString() }
+    private val logFile = File("${logFileDirectory}${separator}chat_log.txt")
     private var responseLog = ArrayList<GPTResponse>()
     private var chatLog = ArrayList<Message>()
     private var messages = mutableListOf(

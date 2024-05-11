@@ -173,11 +173,12 @@ class UIGpt(var project: Project) {
         val scope = CoroutineScope(Dispatchers.Default)
 
         usefulButton.addActionListener {
+            gptInteraction.markLastResponseAs(true)
 
         }
 
         notUsefulButton.addActionListener {
-
+            gptInteraction.markLastResponseAs(false)
         }
 
 
@@ -327,6 +328,7 @@ class UIGpt(var project: Project) {
                 //Adding the prompt that is being sent
                 gptInteraction.addPromptMessage(escapedMessage)
                 chatHtml.append("User", escapedMessage, true)
+                gptInteraction.logMessageUser(escapedMessage)
                 updateChatScreen()
 
                 val response = gptInteraction.executePrompt(escapedMessage)

@@ -8,15 +8,30 @@ class LogMessage(
     private var useful: Boolean?
 ) {
     override fun toString(): String {
-        if (author == "ChatGPT") {
-
+        if (isFromGPT()) {
+            return """
+            Author: $author
+            Message: $content
+            DateTime: $localDateTime
+            Model: $model
+            Useful: $useful
+            
+            """.trimIndent()
         }
 
         return """
             Author: $author
             Message: $content
             DateTime: $localDateTime
-            Model: $model
+            
         """.trimIndent()
+    }
+
+    fun isFromGPT(): Boolean {
+        return author == "ChatGPT"
+    }
+
+    fun markAs(useful: Boolean?) {
+        this.useful = useful
     }
 }

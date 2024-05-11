@@ -23,7 +23,7 @@ class GptInteraction(var project: Project) {
     private val logFileDirectory = project.let { FileEditorManager.getInstance(it).project.basePath.toString() }
     private val dateTime = Date()
     private val formatter = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss")
-    private val logFile = File("${logFileDirectory}${separator}chat_log_${formatter.format(dateTime)}.txt")
+    private val logFile = File("${logFileDirectory}${separator}chat_logs${separator}chat_log_${formatter.format(dateTime)}.txt")
     private var responseLog = ArrayList<GPTResponse>()
     private var chatLog = ArrayList<Message>()
     private var chatToSave = ArrayList<LogMessage>()
@@ -32,15 +32,16 @@ class GptInteraction(var project: Project) {
     )
 
     init {
-        val directory = File(logFileDirectory)
-        if (!directory.exists()) {
-            directory.mkdirs()
+        val logFileParent = logFile.parentFile
+        if (!logFileParent.exists()) {
+            logFileParent.mkdirs() // Creating the parent directories if they don't exist
+        }
+        if (!logFile.exists()) {
+            logFile.createNewFile() // Creating the target file if it doesn't exist
         }
     }
 
     fun executePrompt(prompt: String): String {
-
-        logMessageUser(prompt)
 
         val chatGptResponse = processPrompt()
 
@@ -152,11 +153,13 @@ class GptInteraction(var project: Project) {
             println("Couldn't write file")
         }
         */
-        val logMessage = LogMessage("ChatGPT", message, java.time.LocalDateTime.now(), null, null)
+        val logMessage = LogMessage("ChatGPT", message.trim(), java.time.LocalDateTime.now(), model, null)
         chatToSave.add(logMessage)
+
+        updateLogFile()
     }
 
-    private fun logMessageUser(prompt: String) {
+    public fun logMessageUser(prompt: String) {
         //println(logFile.absolutePath)
         /*
         try {
@@ -170,15 +173,17 @@ class GptInteraction(var project: Project) {
         }
         */
 
-        val logMessage = LogMessage("user", prompt, java.time.LocalDateTime.now(), null, null)
+        val logMessage = LogMessage("user", prompt.trim(), java.time.LocalDateTime.now(), null, null)
         chatToSave.add(logMessage)
+
+        updateLogFile()
     }
 
-    fun updateLogFile() {
+    private fun updateLogFile() {
         logFile.delete()
-
+        logFile.createNewFile()
         for (message in chatToSave) {
-            logFile.appendText(message.toString())
+            logFile.appendText(message.toString() + "\n")
         }
     }
 
@@ -220,4 +225,13 @@ class GptInteraction(var project: Project) {
         return log
     }
 
+    fun markLastResponseAs(useful: Boolean) {
+        for (message in chatToSave.reversed()) {
+            if (!message.isFromGPT()) {
+                break
+            }
+            message.markAs(useful)
+        }
+        updateLogFile()
+    }
 }

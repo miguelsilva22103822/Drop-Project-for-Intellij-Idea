@@ -1,9 +1,11 @@
 package org.dropProject.dropProjectPlugin.submissionComponents
 
+import com.intellij.ui.JBColor
 import com.intellij.util.ui.StyleSheetUtil
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.Parser
 import javax.swing.text.html.StyleSheet
+
 
 class ChatHtmlBuilder {
     private var cssStyle = "<style>\n" +
@@ -71,7 +73,7 @@ class ChatHtmlBuilder {
         return htmlResponse
     }
 
-    public fun getStyle(): StyleSheet = StyleSheetUtil.loadStyleSheet("""
+    fun getStyle(): StyleSheet = StyleSheetUtil.loadStyleSheet("""
     * {
         margin: 0;
         padding: 0;
@@ -97,16 +99,40 @@ class ChatHtmlBuilder {
     .user-column {
         width: 4%;
         font-weight: bold;
-        color: rgb(150, 255, 150);
+        color: ${getUserColor()};
     }
     .message-column {
         width: 96%;
-        color: #ffffff; /* Set text color for contrast */
-        /*background-color: #000000; Set background color */
     }
     .chatgpt-column {
         font-weight: bold;
-        color: rgb(100, 255, 255);
+        color: ${getGPTColor()};
     }
     """.trimIndent())
+
+
+    private fun getUserColor(): String {
+        if (isCurrentThemeDark()) {
+            return "rgb(50, 255, 50)"
+        }
+        return "rgb(0, 230, 0)"
+    }
+
+    private fun getGPTColor(): String {
+        if (isCurrentThemeDark()) {
+            return "rgb(0, 100, 255)"
+        }
+        return "rgb(0, 0, 240)"
+    }
+
+    private fun isCurrentThemeDark(): Boolean {
+        val backgroundColor = JBColor.background()
+        val red = backgroundColor.red
+        val green = backgroundColor.green
+        val blue = backgroundColor.blue
+
+
+        val luminance = 0.299 * red + 0.587 * green + 0.114 * blue
+        return luminance < 128
+    }
 }

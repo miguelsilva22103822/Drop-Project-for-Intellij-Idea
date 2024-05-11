@@ -131,7 +131,8 @@ class UIGpt(var project: Project) {
     private var inputAndSubmitPanel = JPanel(GridBagLayout())
     private var uI: JBScrollPane = JBScrollPane()
     private var chatHtml = ChatHtmlBuilder()
-
+    private var usefulButton = JButton("Useful")
+    private var notUsefulButton = JButton("Not Useful")
     private var askTwice = false
 
     init {
@@ -148,7 +149,8 @@ class UIGpt(var project: Project) {
 
             isEditable = false
             foreground = JBColor.foreground()
-            isOpaque = false
+            background = JBColor.background()
+            isOpaque = true
             text = chatHtml.getHtmlChat()
 
             UIUtil.doNotScrollToCaret(this)
@@ -170,34 +172,55 @@ class UIGpt(var project: Project) {
 
         val scope = CoroutineScope(Dispatchers.Default)
 
+        usefulButton.addActionListener {
+
+        }
+
+        notUsefulButton.addActionListener {
+
+        }
+
+
         sendButton = JButton("Send Message")
         sendButton.addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent?) = sendPrompt()
         })
 
+        val usefulButtonConstraints = GridBagConstraints()
+        usefulButtonConstraints.fill = GridBagConstraints.HORIZONTAL
+        usefulButtonConstraints.weightx = 0.5
+        usefulButtonConstraints.insets = JBUI.insets(3) // Custom padding
+        usefulButtonConstraints.gridx = 0 // Place at column 0
+        usefulButtonConstraints.gridy = 0 // Place in the first row
 
-// Define constraints for components with custom padding and sizes
+        val notUsefulButtonConstraints = GridBagConstraints()
+        notUsefulButtonConstraints.fill = GridBagConstraints.HORIZONTAL
+        notUsefulButtonConstraints.weightx = 0.5
+        notUsefulButtonConstraints.insets = JBUI.insets(3) // Custom padding
+        notUsefulButtonConstraints.gridx = 1 // Place at column 1
+        notUsefulButtonConstraints.gridy = 0 // Place in the first row
+
         val textFieldConstraints = GridBagConstraints()
         textFieldConstraints.fill = GridBagConstraints.HORIZONTAL
         textFieldConstraints.weightx = 1.0
         textFieldConstraints.gridwidth = 3 // Span three columns
         textFieldConstraints.insets = JBUI.insets(3) // Custom padding
         textFieldConstraints.gridx = 0 // Place at column 0
-        textFieldConstraints.gridy = 0 // Place in the first row
+        textFieldConstraints.gridy = 1 // Place in the second row
 
         val phraseComboBoxConstraints = GridBagConstraints()
         phraseComboBoxConstraints.fill = GridBagConstraints.HORIZONTAL
         phraseComboBoxConstraints.weightx = 0.5
         phraseComboBoxConstraints.insets = JBUI.insets(3) // Custom padding
         phraseComboBoxConstraints.gridx = 0 // Place at column 0
-        phraseComboBoxConstraints.gridy = 1 // Place in the second row
+        phraseComboBoxConstraints.gridy = 2 // Place in the third row
 
         val checkBoxConstraints = GridBagConstraints()
         checkBoxConstraints.fill = GridBagConstraints.HORIZONTAL
         checkBoxConstraints.weightx = 0.1 // Increased weightx value
         checkBoxConstraints.insets = JBUI.insets(3, 30, 3, 3) // Add more padding to the right
         checkBoxConstraints.gridx = 1 // Place at column 1
-        checkBoxConstraints.gridy = 1 // Place in the second row
+        checkBoxConstraints.gridy = 2 // Place in the third row
 
         val sendButtonConstraints = GridBagConstraints()
         sendButtonConstraints.fill = GridBagConstraints.HORIZONTAL
@@ -205,36 +228,37 @@ class UIGpt(var project: Project) {
         sendButtonConstraints.gridwidth = 3 // Span three columns
         sendButtonConstraints.insets = JBUI.insets(3) // Custom padding
         sendButtonConstraints.gridx = 0 // Place at column 0
-        sendButtonConstraints.gridy = 2 // Place in the third row
-// Add checkbox to the panel with constraints
+        sendButtonConstraints.gridy = 3 // Place in the fourth row
+
         val askTwiceCheckBox = JCheckBox("Ask for 2 solutions")
 
 
-// Listener for checkbox state change
+
         askTwiceCheckBox.addActionListener { _ ->
             askTwice = askTwiceCheckBox.isSelected
         }
 
-// Add components to the panel with constraints
         inputAndSubmitPanel = JPanel(GridBagLayout())
+        inputAndSubmitPanel.add(usefulButton, usefulButtonConstraints)
+        inputAndSubmitPanel.add(notUsefulButton, notUsefulButtonConstraints)
         inputAndSubmitPanel.add(textField, textFieldConstraints)
         inputAndSubmitPanel.add(phraseComboBox, phraseComboBoxConstraints)
         inputAndSubmitPanel.add(askTwiceCheckBox, checkBoxConstraints) // Add checkbox in the second column
         inputAndSubmitPanel.add(sendButton, sendButtonConstraints) // Add send button in the third column
 
-// Set preferred size for the panel
+
         inputAndSubmitPanel.preferredSize = Dimension(600, 140) // Increased height to accommodate the taller button
 
 
         responseArea.size = Dimension(200, -1)
-// Add the panel and response area to the main panel
+
         val panel = JPanel()
         panel.layout = BorderLayout()
         panel.add(responseArea, BorderLayout.CENTER)
         panel.add(inputAndSubmitPanel, BorderLayout.SOUTH)
         panel.size = Dimension(800, -1)
 
-// Set up the scroll pane
+
         val scrollPane = JBScrollPane(panel)
         val viewport: JViewport = scrollPane.viewport
         viewport.scrollMode = JViewport.SIMPLE_SCROLL_MODE
@@ -242,7 +266,6 @@ class UIGpt(var project: Project) {
         scrollPane.verticalScrollBarPolicy = JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS
         viewport.extentSize = Dimension(0, 0)
 
-// Assign scroll pane to UI
         uI = scrollPane
 
     }

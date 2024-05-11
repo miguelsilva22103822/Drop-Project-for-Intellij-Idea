@@ -11,6 +11,8 @@ import org.dropProject.dropProjectPlugin.DefaultNotification
 import org.dropProject.dropProjectPlugin.settings.SettingsState
 import java.io.File
 import java.nio.file.FileSystems
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 
@@ -19,9 +21,12 @@ class GptInteraction(var project: Project) {
     private val separator = FileSystems.getDefault().separator
     //private val logFileDirectory = "${System.getProperty("user.home")}${separator}Documents${separator}Drop Project Plugin${separator}"
     private val logFileDirectory = project.let { FileEditorManager.getInstance(it).project.basePath.toString() }
-    private val logFile = File("${logFileDirectory}${separator}chat_log.txt")
+    private val dateTime = Date()
+    private val formatter = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss")
+    private val logFile = File("${logFileDirectory}${separator}chat_log_${formatter.format(dateTime)}.txt")
     private var responseLog = ArrayList<GPTResponse>()
     private var chatLog = ArrayList<Message>()
+    private var chatToSave = ArrayList<LogMessage>()
     private var messages = mutableListOf(
         Message("system", "You are a helpful assistant"),
     )
@@ -135,27 +140,50 @@ class GptInteraction(var project: Project) {
 
     private fun logMessageGpt(message: String) {
         //println(logFile.absolutePath)
-        logFile.appendText(
-            "Author: ChatGPT" + "\n" +
-                    "Model: $model\n" +
-                    "DateTime: ${java.time.LocalDateTime.now()}\n" +
-                    "Message: $message\n\n"
-        )
+        /*
+        try{
+            logFile.appendText(
+                "Author: ChatGPT" + "\n" +
+                        "Model: $model\n" +
+                        "DateTime: ${java.time.LocalDateTime.now()}\n" +
+                        "Message: $message\n\n"
+            )
+        } catch (exception : Exception){
+            println("Couldn't write file")
+        }
+        */
+        val logMessage = LogMessage("ChatGPT", message, java.time.LocalDateTime.now(), null, null)
+        chatToSave.add(logMessage)
     }
 
     private fun logMessageUser(prompt: String) {
         //println(logFile.absolutePath)
+        /*
+        try {
+            logFile.appendText(
+                "Author: User" + "\n" +
+                        "DateTime: ${java.time.LocalDateTime.now()}\n" +
+                        "Message: $prompt\n\n"
+            )
+        } catch (exception : Exception){
+            println("Couldn't write file")
+        }
+        */
 
-        logFile.appendText(
-            "Author: User" + "\n" +
-                    "DateTime: ${java.time.LocalDateTime.now()}\n" +
-                    "Message: $prompt\n\n"
-        )
+        val logMessage = LogMessage("user", prompt, java.time.LocalDateTime.now(), null, null)
+        chatToSave.add(logMessage)
+    }
+
+    fun updateLogFile() {
+        logFile.delete()
+
+        for (message in chatToSave) {
+            logFile.appendText(message.toString())
+        }
     }
 
     fun addPromptMessage(prompt: String) {
         val message = Message("user", prompt)
-
         messages.add(message)
         chatLog.add(message)
     }

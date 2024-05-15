@@ -3,6 +3,7 @@ package org.dropProject.dropProjectPlugin.submissionComponents
 import com.intellij.diff.DiffContentFactory
 import com.intellij.diff.DiffManager
 import com.intellij.diff.requests.SimpleDiffRequest
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.project.Project
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBScrollPane
@@ -129,8 +130,8 @@ class UIGpt(var project: Project) {
     private var inputAndSubmitPanel = JPanel(GridBagLayout())
     private var uI: JBScrollPane = JBScrollPane()
     private var chatHtml = ChatHtmlBuilder()
-    private var usefulButton = JButton("Useful")
-    private var notUsefulButton = JButton("Not Useful")
+    private var usefulButton = JButton("Useful", AllIcons.Ide.LikeSelected)
+    private var notUsefulButton = JButton("Not Useful", AllIcons.Ide.DislikeSelected)
     private var copyCodeButton = JButton("Copy Code")
     private var askTwice = false
 

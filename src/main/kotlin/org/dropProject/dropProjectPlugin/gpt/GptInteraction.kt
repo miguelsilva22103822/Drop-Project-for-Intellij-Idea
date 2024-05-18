@@ -21,9 +21,9 @@ class GptInteraction(var project: Project) {
     private val separator = FileSystems.getDefault().separator
     //private val logFileDirectory = "${System.getProperty("user.home")}${separator}Documents${separator}Drop Project Plugin${separator}"
     private val logFileDirectory = project.let { FileEditorManager.getInstance(it).project.basePath.toString() }
-    private val dateTime = Date()
     private val formatter = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss")
-    private val logFile = File("${logFileDirectory}${separator}chat_logs${separator}chat_log_${formatter.format(dateTime)}.txt")
+    private var dateTime = Date()
+    private var logFile = File("${logFileDirectory}${separator}chat_logs${separator}chat_log_${formatter.format(dateTime)}.txt")
     private var responseLog = ArrayList<GPTResponse>()
     private var chatLog = ArrayList<Message>()
     private var chatToSave = ArrayList<LogMessage>()
@@ -32,6 +32,10 @@ class GptInteraction(var project: Project) {
     )
 
     init {
+        createPathIfDoesntExist()
+    }
+
+    private fun createPathIfDoesntExist() {
         val logFileParent = logFile.parentFile
         if (!logFileParent.exists()) {
             logFileParent.mkdirs() // Creating the parent directories if they don't exist
@@ -260,4 +264,21 @@ class GptInteraction(var project: Project) {
         }
         updateLogFile()
     }
+
+    fun reset() {
+        //Change to a new log file
+        dateTime = Date()
+        dateTime = Date()
+        logFile = File("${logFileDirectory}${separator}chat_logs${separator}chat_log_${formatter.format(dateTime)}.txt")
+        createPathIfDoesntExist()
+
+        //Reset Data structure
+        responseLog = ArrayList<GPTResponse>()
+        chatLog = ArrayList<Message>()
+        chatToSave = ArrayList<LogMessage>()
+        messages = mutableListOf(
+            Message("system", "You are a helpful assistant"),
+        )
+    }
+
 }

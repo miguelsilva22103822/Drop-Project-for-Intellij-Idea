@@ -5,7 +5,10 @@ import org.commonmark.renderer.html.HtmlRenderer
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.io.File
-import javax.swing.*
+import javax.swing.JEditorPane
+import javax.swing.JFrame
+import javax.swing.JScrollPane
+import javax.swing.SwingUtilities
 
 class MarkdownRenderer : JFrame() {
 
@@ -83,8 +86,8 @@ class MarkdownRenderer : JFrame() {
         val jSFile = File(jSPath)
         val cSSFile = File(cSSPath)
 
-        println(jSFile.absolutePath)
-        println(cSSFile.absolutePath)
+        //println(jSFile.absolutePath)
+        //println(cSSFile.absolutePath)
 
         var jSContent = ""
         var cSSContent = ""

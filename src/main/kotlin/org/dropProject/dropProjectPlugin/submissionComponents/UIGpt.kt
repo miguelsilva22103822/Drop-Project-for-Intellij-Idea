@@ -422,7 +422,7 @@ class UIGpt(var project: Project) {
         SwingUtilities.invokeLater {
             uI.verticalScrollBar.value = uI.verticalScrollBar.maximum
         }
-        println(chatHtml.getHtmlChat())
+        //println(chatHtml.getHtmlChat())
     }
 
     fun updatePhrases() {

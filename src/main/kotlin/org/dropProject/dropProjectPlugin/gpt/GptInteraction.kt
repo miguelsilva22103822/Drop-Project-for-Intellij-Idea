@@ -242,10 +242,11 @@ class GptInteraction(var project: Project) {
             var startIndex = messageContent.indexOf(codeBlockDelimiter)
             messageContent = messageContent.substring(startIndex, messageContent.length)
 
+
             startIndex = messageContent.indexOf("\n")
             messageContent = messageContent.substring(startIndex, messageContent.length)
 
-            val endIndex = messageContent.lastIndexOf(codeBlockDelimiter)
+            val endIndex = messageContent.indexOf(codeBlockDelimiter)
 
             return messageContent.substring(0, endIndex)
 
@@ -267,7 +268,6 @@ class GptInteraction(var project: Project) {
 
     fun reset() {
         //Change to a new log file
-        dateTime = Date()
         dateTime = Date()
         logFile = File("${logFileDirectory}${separator}chat_logs${separator}chat_log_${formatter.format(dateTime)}.txt")
         createPathIfDoesntExist()

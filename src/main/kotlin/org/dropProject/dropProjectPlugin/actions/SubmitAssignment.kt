@@ -15,7 +15,6 @@ import com.squareup.moshi.Moshi
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import org.dropProject.dropProjectPlugin.DefaultNotification
 import org.dropProject.dropProjectPlugin.ZipFolder
@@ -45,7 +44,7 @@ class SubmitAssignment(private var toolWindow: DropProjectToolWindow) : DumbAwar
                 null, "You need to login before submitting an assignment", "Submit", JOptionPane.ERROR_MESSAGE
             )
 
-        } else if (toolWindow.globals.selectedAssignmentID.isEmpty()) {
+        } else if (toolWindow.globals.selectedAssignmentID?.isEmpty() == true) {
             // Before trying to submit project, check if an assignment has been chosen
             JOptionPane.showMessageDialog(
                 null, "You need to choose an assignment first", "Unassigned Submission", JOptionPane.INFORMATION_MESSAGE
@@ -56,11 +55,14 @@ class SubmitAssignment(private var toolWindow: DropProjectToolWindow) : DumbAwar
             FileDocumentManager.getInstance().saveAllDocuments()
             val uploadFilePath = ZipFolder(toolWindow.studentsList).zipIt(e) ?: return
 
-            val body: RequestBody = MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart(
-                "file",
-                "projeto.zip",
-                File(uploadFilePath).asRequestBody("application/octet-stream".toMediaTypeOrNull())
-            ).addFormDataPart("assignmentId", toolWindow.globals.selectedAssignmentID).build()
+            val body: MultipartBody? =
+                toolWindow.globals.selectedAssignmentID?.let {
+                    MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart(
+                        "file",
+                        "projeto.zip",
+                        File(uploadFilePath).asRequestBody("application/octet-stream".toMediaTypeOrNull())
+                    ).addFormDataPart("assignmentId", it).build()
+                }
 
             val request: Request = Request.Builder().url(REQUEST_URL).method("POST", body).build()
             val moshi = Moshi.Builder().build()

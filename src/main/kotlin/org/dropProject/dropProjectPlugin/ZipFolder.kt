@@ -21,6 +21,11 @@ class ZipFolder(private val students: ArrayList<User>) {
             AuthorsFile(students).make(projectDirectory, true, e)
         }
 
+        // Delete any existing zip file to ensure a new one is created
+        if (newUploadFile.exists()) {
+            newUploadFile.delete()
+        }
+
         // Add AUTHORS.txt to a new zip
         ZipFile(newUploadFile)
             .addFile(File(authorsPath))
@@ -33,21 +38,26 @@ class ZipFolder(private val students: ArrayList<User>) {
             )
             null
         } else {
-
             val zipFile = ZipFile(newUploadFile)
 
             zipFile.addFolder(File(srcPath))
 
             if (File(testsFilesPath).exists()) {
-                // Add the "test-files" folder on the existing zip
-                zipFile.addFolder(File(testsFilesPath))
+                // Ask the user if they want to include the test files
+                val includeTests = JOptionPane.showConfirmDialog(
+                    null,
+                    "Do you want to include the test files?",
+                    "Include Test Files",
+                    JOptionPane.YES_NO_OPTION
+                )
+
+                if (includeTests == JOptionPane.YES_OPTION) {
+                    // Add the "test-files" folder to the existing zip
+                    zipFile.addFolder(File(testsFilesPath))
+                }
             }
 
             newUploadFile.path
         }
-
-
     }
-
-
 }

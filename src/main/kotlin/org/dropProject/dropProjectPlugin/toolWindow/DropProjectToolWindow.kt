@@ -150,7 +150,7 @@ class DropProjectToolWindow(var project: Project) {
         }
 
         //previous selected private assignments that now are disabled are not verified here still
-        if (globals.selectedAssignmentID.isNotEmpty() && tableModel!!.items.find { it.id_notVisible == globals.selectedAssignmentID } == null) {
+        if (globals.selectedAssignmentID!!.isNotEmpty() && tableModel!!.items.find { it.id_notVisible == globals.selectedAssignmentID } == null) {
             DefaultNotification.notify(
                 project,
                 "<html>The assignment <b>${globals.selectedAssignmentID}</b> is no longer available</html>"

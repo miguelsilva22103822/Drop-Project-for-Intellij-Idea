@@ -8,7 +8,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.CheckBox
 import com.intellij.ui.components.JBScrollPane
-import com.intellij.ui.components.JBTextField
+import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.HTMLEditorKitBuilder
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
@@ -20,9 +20,13 @@ import org.dropProject.dropProjectPlugin.gpt.GptInteraction
 import org.dropProject.dropProjectPlugin.settings.SettingsState
 import java.awt.*
 import java.awt.datatransfer.StringSelection
+import java.awt.event.KeyAdapter
+import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 
 
 /*
@@ -124,7 +128,7 @@ class UIGpt(var project: Project) {
 
 
     private var gptInteraction = GptInteraction(project)
-    private var textField = JBTextField()
+    private var textField = JBTextArea(3, 20)
     private var phrases = ArrayList<String>()
     private var sendButton = JButton()
     private var phraseComboBox = JComboBox(phrases.toArray())
@@ -139,11 +143,33 @@ class UIGpt(var project: Project) {
     private var resetButton = JButton("Clear Chat", AllIcons.Actions.Refresh)
     private var askTwiceCheckBox = CheckBox("Ask for 2 Solutions")
     private var askTwice = false
+    private var waitingForResponse = false
 
     init {
-        textField.emptyText.text = "Send a message"
+        //textField.emptyText.text = "Send a message"
         //textField.preferredSize = Dimension(400, 30)  // Set a preferred size for the textField
+        textField.font = Font("Dialog", Font.PLAIN, 10)
 
+        textField.margin = JBUI.insets(5)
+
+        textField.addKeyListener(object : KeyAdapter() {
+            override fun keyPressed(e: KeyEvent) {
+                if (e.keyCode == KeyEvent.VK_ENTER) {
+                    if (e.isShiftDown) {
+                        textField.append("\n")
+                    } else if (!waitingForResponse) {
+                        e.consume()  // Prevent newline character from being added
+                        sendPrompt()
+                    }
+                }
+            }
+        })
+
+        textField.document.addDocumentListener(object : DocumentListener {
+            override fun insertUpdate(e: DocumentEvent) = updateTextFieldSize()
+            override fun removeUpdate(e: DocumentEvent) = updateTextFieldSize()
+            override fun changedUpdate(e: DocumentEvent) = updateTextFieldSize()
+        })
 
         responseArea.apply {
             contentType = "text/html"
@@ -238,7 +264,7 @@ class UIGpt(var project: Project) {
         gbc.gridwidth = 2 // TextField spans two columns
         gbc.weightx = 1.0 // Takes up remaining space
         gbc.fill = GridBagConstraints.BOTH
-        inputAndSubmitPanel.add(textField, gbc)
+        inputAndSubmitPanel.add(JBScrollPane(textField), gbc)
 
         // Phrase Combo Panel and CheckBox
         gbc.gridwidth = 1 // Reset to default gridwidth
@@ -297,6 +323,11 @@ class UIGpt(var project: Project) {
 
     }
 
+    private fun updateTextFieldSize() {
+        val prefSize = textField.preferredSize
+        textField.setSize(prefSize.width, prefSize.height)
+        textField.revalidate()
+    }
 
 
     fun buildComponents(): JBScrollPane {
@@ -365,6 +396,7 @@ class UIGpt(var project: Project) {
 
         if (textField.text != null && textField.text != "") {
             sendButton.isEnabled = false
+            waitingForResponse = true
 
             val selectedPhrase = phraseComboBox.selectedItem as String
             val message = "${textField.text} $selectedPhrase"
@@ -401,6 +433,7 @@ class UIGpt(var project: Project) {
 
                 SwingUtilities.invokeLater {
                     sendButton.isEnabled = true
+                    waitingForResponse = false
                 }
 
             }

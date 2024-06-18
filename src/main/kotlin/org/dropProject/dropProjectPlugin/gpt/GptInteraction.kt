@@ -23,13 +23,11 @@ class GptInteraction(var project: Project) {
     private val logFileDirectory = project.let { FileEditorManager.getInstance(it).project.basePath.toString() }
     private val formatter = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss")
     private var dateTime = Date()
-    private var logFile = File("${logFileDirectory}${separator}chat_logs${separator}chat_log_${formatter.format(dateTime)}.txt")
+    private var logFile = File("${logFileDirectory}${separator}chat_logs${separator}chat_log_${formatter.format(dateTime)}.json")
     private var responseLog = ArrayList<GPTResponse>()
     private var chatLog = ArrayList<Message>()
     private var chatToSave = ArrayList<LogMessage>()
-    private var messages = mutableListOf(
-        Message("system", "You are a helpful assistant"),
-    )
+    private var messages = ArrayList<Message>()
 
     init {
         createPathIfDoesntExist()
@@ -189,6 +187,27 @@ class GptInteraction(var project: Project) {
         for (message in chatToSave) {
             logFile.appendText(message.toString() + "\n")
         }
+
+        logFile.delete()
+        logFile.createNewFile()
+
+        logFile.appendText("{\n")
+        logFile.appendText("\"value\": [\n")
+
+        var i = 0
+        val nrEntries = chatToSave.size
+
+        for (message in chatToSave) {
+            var commaIfNeeded = ""
+            if(i < nrEntries - 1) {
+                commaIfNeeded = ", "
+            }
+            logFile.appendText(message.writeToJSON() + commaIfNeeded + "\n")
+            i++
+        }
+
+        logFile.appendText("]\n")
+        logFile.appendText("}\n")
     }
 
     fun addPromptMessage(prompt: String) {
@@ -276,9 +295,7 @@ class GptInteraction(var project: Project) {
         responseLog = ArrayList<GPTResponse>()
         chatLog = ArrayList<Message>()
         chatToSave = ArrayList<LogMessage>()
-        messages = mutableListOf(
-            Message("system", "You are a helpful assistant"),
-        )
+        messages = ArrayList<Message>()
     }
 
 }

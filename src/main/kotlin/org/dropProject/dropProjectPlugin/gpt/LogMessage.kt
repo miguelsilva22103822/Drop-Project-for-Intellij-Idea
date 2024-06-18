@@ -1,5 +1,7 @@
 package org.dropProject.dropProjectPlugin.gpt
 
+import com.google.gson.Gson
+
 class LogMessage(
     private val author: String,
     private val content: String,
@@ -29,6 +31,10 @@ class LogMessage(
 
     fun isFromGPT(): Boolean {
         return author == "ChatGPT"
+    }
+
+    fun writeToJSON(): String {
+        return Gson().toJson(this)
     }
 
     fun markAs(useful: Boolean?) {

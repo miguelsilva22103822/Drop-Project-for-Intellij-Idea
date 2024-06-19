@@ -42,7 +42,7 @@ class SettingsConfigurable : Configurable {
         settings.openAiToken = mySettingsComponent?.getOpenAiTokenField()!!
         settings.autoSendPrompt = mySettingsComponent?.isAutoSendPromptSelected() ?: false
         settings.sentenceList = (mySettingsComponent?.getSentenceList() as MutableList<String>?)!!
-        UIGpt.instance1?.updatePhrases()
+        UIGpt.instance1?.updatePhrases(mySettingsComponent?.getSentenceList() as MutableList<String>)
     }
 
     override fun reset() {
@@ -55,8 +55,10 @@ class SettingsConfigurable : Configurable {
         settings.autoSendPrompt.let { mySettingsComponent?.setAutoSendPrompt(it) }
         settings.sentenceList.let { mySettingsComponent?.setSentenceList(it) }
         settings.sentenceList.let {
-            if (it.isEmpty()|| it.size == 1) {
+            if (it.isEmpty()) {
                 it.addAll(listOf("Find the bug", "Improve the performance", "Explain this code", "Write tests for this function"))
+                val uiGpt = UIGpt.getInstance()
+                uiGpt.updatePhrases(mutableListOf("Find the bug", "Improve the performance", "Explain this code", "Write tests for this function"))
             }
             mySettingsComponent?.setSentenceList(it)
         }

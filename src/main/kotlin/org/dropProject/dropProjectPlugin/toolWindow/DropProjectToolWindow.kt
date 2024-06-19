@@ -36,7 +36,7 @@ import javax.swing.JPanel
 
 class DropProjectToolWindow(var project: Project) {
 
-    var uiGPT : UIGpt = UIGpt(project)
+    var uiGPT : UIGpt = UIGpt()
     var studentsList = ArrayList<User>()
     var tableModel: AssignmentTableModel? = null
     var resultsTable: ListTable? = null
@@ -79,7 +79,7 @@ class DropProjectToolWindow(var project: Project) {
             createTabComponent(tabbedPane, "Assignment List", AllIcons.Actions.ListFiles, assignmentTablePanel, false)
         )
 
-        val gui : UIGpt = UIGpt.getInstance(project)
+        val gui : UIGpt = UIGpt.getInstance()
 
         tabbedPane.setTabComponentAt(
             1,

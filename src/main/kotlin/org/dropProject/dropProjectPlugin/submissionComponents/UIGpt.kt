@@ -4,7 +4,7 @@ import com.intellij.diff.DiffContentFactory
 import com.intellij.diff.DiffManager
 import com.intellij.diff.requests.SimpleDiffRequest
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.CheckBox
 import com.intellij.ui.components.JBScrollPane
@@ -124,9 +124,9 @@ class UIGpt {
 */
 
 
-class UIGpt(var project: Project) {
+class UIGpt() {
 
-
+    private var project = ProjectManager.getInstance().openProjects[0]
     private var gptInteraction = GptInteraction(project)
     private var textField = JBTextArea(3, 20)
     private var phrases = ArrayList<String>()
@@ -458,28 +458,28 @@ class UIGpt(var project: Project) {
         //println(chatHtml.getHtmlChat())
     }
 
-    fun updatePhrases() {
+    private fun updatePhrasadses() { //might be useless
         val settingsState = SettingsState.getInstance()
         phrases = ArrayList(settingsState.sentenceList)
 
-        phrases.add("") //Option that doesn't add anything to the prompt
+        phrases.add(0, "") // Option that doesn't add anything to the prompt
 
-
-        phraseComboBox.removeAll()
+        phraseComboBox.removeAllItems() // Correct method to clear all items from JComboBox
+        for (phrase in phrases) {
+            phraseComboBox.addItem(phrase) // Add each phrase to the JComboBox
+        }
     }
 
-    fun addPhrase(phrase : String) {
-        phraseComboBox.addItem(phrase)
-    }
+    fun updatePhrases(sentenceList: MutableList<String>) {
+        phrases = sentenceList as ArrayList<String>
 
-    fun removePhrase(index : Int) {
-        phraseComboBox.removeItemAt(index)
-    }
+        phrases.add(0, "") // Option that doesn't add anything to the prompt
 
-    fun editPhrase(selectedIndex : Int, editedSentence : String) {
-        phraseComboBox.removeItemAt(selectedIndex)
-        phraseComboBox.insertItemAt(editedSentence, selectedIndex)
-        phraseComboBox.selectedIndex = selectedIndex
+        phraseComboBox.removeAllItems() // Clear all items from JComboBox
+
+        for (phrase in phrases) {
+            phraseComboBox.addItem(phrase) // Add each phrase to the JComboBox
+        }
     }
 
     private fun resetChat() {
@@ -488,14 +488,13 @@ class UIGpt(var project: Project) {
         updateChatScreen()
     }
 
-
     companion object {
         var instance1 : UIGpt? = null
 
-        fun getInstance(project: Project) : UIGpt {
+        fun getInstance() : UIGpt {
 
             if(instance1 == null) {
-                instance1 = UIGpt(project)
+                instance1 = UIGpt()
             }
             return instance1!!
         }

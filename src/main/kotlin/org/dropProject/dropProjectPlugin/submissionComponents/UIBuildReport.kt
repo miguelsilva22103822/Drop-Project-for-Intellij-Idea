@@ -162,7 +162,7 @@ internal class UIBuildReport(private val project: Project) {
 
 
     private fun sendToChatGPTAction(error : String) {
-        val uiGPT = UIGpt.getInstance(project)
+        val uiGPT = UIGpt.getInstance()
         uiGPT.addToPrompt(error)
 
         val settingsState = SettingsState.getInstance()

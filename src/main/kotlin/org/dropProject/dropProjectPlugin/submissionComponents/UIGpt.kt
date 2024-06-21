@@ -144,6 +144,7 @@ class UIGpt() {
     private var askTwiceCheckBox = CheckBox("Ask for 2 Solutions")
     private var askTwice = false
     private var waitingForResponse = false
+    private val ratingButtons = false;
 
     init {
         //textField.emptyText.text = "Send a message"
@@ -241,22 +242,25 @@ class UIGpt() {
         gbc.fill = GridBagConstraints.BOTH
         inputAndSubmitPanel.add(copyCodeButton, gbc)
 
-        // Configuration for the second row with two components
-        gbc.gridwidth = 1 // Reset to default gridwidth
 
-        // Useful Button
-        gbc.gridx = 0
-        gbc.gridy = 1
-        gbc.weightx = 0.5 // Each button gets half the space
-        gbc.anchor = GridBagConstraints.CENTER // Center the button in its cell
-        inputAndSubmitPanel.add(usefulButton, gbc)
+        if(ratingButtons) {
+            // Configuration for the second row with two components
+            gbc.gridwidth = 1 // Reset to default gridwidth
 
-        // Not Useful Button
-        gbc.gridx = 1
-        gbc.gridy = 1
-        gbc.weightx = 0.5 // Ensuring even split of horizontal space
-        gbc.anchor = GridBagConstraints.CENTER // Center the button in its cell
-        inputAndSubmitPanel.add(notUsefulButton, gbc)
+            // Useful Button
+            gbc.gridx = 0
+            gbc.gridy = 1
+            gbc.weightx = 0.5 // Each button gets half the space
+            gbc.anchor = GridBagConstraints.CENTER // Center the button in its cell
+            inputAndSubmitPanel.add(usefulButton, gbc)
+
+            // Not Useful Button
+            gbc.gridx = 1
+            gbc.gridy = 1
+            gbc.weightx = 0.5 // Ensuring even split of horizontal space
+            gbc.anchor = GridBagConstraints.CENTER // Center the button in its cell
+            inputAndSubmitPanel.add(notUsefulButton, gbc)
+        }
 
         // TextField row
         gbc.gridx = 0

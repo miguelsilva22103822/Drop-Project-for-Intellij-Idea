@@ -76,6 +76,8 @@ internal class UIBuildReport(private val project: Project) {
                         group("Error $index") {
                             row {
                                 text(error)
+                            }
+                            row {
                                 button("Send to ChatGPT") {
                                     sendToChatGPTAction(error)
                                 }
@@ -96,6 +98,8 @@ internal class UIBuildReport(private val project: Project) {
                             group {
                                 row {
                                     text(error)
+                                }
+                                row {
                                     button("Send to ChatGPT") {
                                         sendToChatGPTAction(error)
                                     }
@@ -112,6 +116,8 @@ internal class UIBuildReport(private val project: Project) {
                         group {
                             row {
                                 text(error)
+                            }
+                            row {
                                 button("Send to ChatGPT") {
                                     sendToChatGPTAction(error)
                                 }
@@ -130,6 +136,8 @@ internal class UIBuildReport(private val project: Project) {
                                     text(
                                         error.replace("<", "&lt;").replace("\n", "<br>")
                                     )
+                                }
+                                row {
                                     button("Send to ChatGPT") {
                                         sendToChatGPTAction(error)
                                     }

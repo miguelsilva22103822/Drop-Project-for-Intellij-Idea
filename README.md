@@ -11,8 +11,10 @@ More concretely, the following functionality was added to the original (v9.3.0) 
 
 This will soon be integrated in the official GitHub repository and in the IntelliJ IDEA store.
 
-Official DP Student Plugin Plugin repository:
+## More information
+
+### Official DP Student Plugin Plugin repository:
 https://github.com/drop-project-edu/Drop-Project-for-Intellij-Idea
 
-Demonstration Video:
+### Demonstration Video:
 https://www.youtube.com/watch?v=kwJNQ3Ls52g
